@@ -279,7 +279,9 @@ function initRealtimeRequestCounter () {
     forever {
         from requestStream
         window time(10000)
-        select host, count(host) as count group by host having count > 10
+        select host, count(host) as count 
+        group by host 
+        having count > 10
         => (RequestCount [] counts) {
                 //The 'counts' is the output of the streaming rules and is published to the `requestCountStream`.
                 //The `select` clause should match the structure of the 'RequestCount' struct.
