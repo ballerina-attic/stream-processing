@@ -18,6 +18,8 @@ map<json> ordersMap;
 @http:ServiceConfig {basePath:"/ordermgt"}
 service<http:Service> order_mgt bind listener {
 
+    future ftr = start initRealtimeRequestCounter();
+
     @Description {value:"Resource that handles the HTTP POST requests that are directed
      to the path '/orders' to create a new Order."}
     @http:ResourceConfig {

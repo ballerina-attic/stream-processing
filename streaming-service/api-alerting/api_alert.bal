@@ -28,7 +28,7 @@ function initRealtimeRequestCounter () {
         window time(10000)
         select host, count(host) as count
         group by host
-        having count > 5
+        having count > 10
         => (RequestCount [] counts) {
                 //The 'counts' is the output of the streaming rules and is published to the `requestCountStream`.
                 //The `select` clause should match the structure of the 'RequestCount' struct.
@@ -39,5 +39,5 @@ function initRealtimeRequestCounter () {
 
 // Define the `printRequestCount` function.
 function printRequestCount (RequestCount reqCount) {
-    io:println("ALERT!! : Received more than 6 requests from the host within 5 seconds: " + reqCount.host);
+    io:println("ALERT!! : Received more than 10 requests from the host within 10 seconds: " + reqCount.host);
 }

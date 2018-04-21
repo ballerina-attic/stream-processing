@@ -32,7 +32,7 @@ Ballerina Streaming supports the following:
 * And many more ...  
 
 
-### Forever Statement Block
+### Forever Statement
 Streaming processing and Complex Event Processing rules can be written in side the forever statement block. Multiple
 streaming queries can put together in a single Forever block. 
 
@@ -332,6 +332,9 @@ map<json> ordersMap;
 @http:ServiceConfig {basePath:"/ordermgt"}
 service<http:Service> order_mgt bind listener {
 
+    // Invoke function to initialise streming queries
+    future ftr = start initRealtimeRequestCounter();
+
     @Description {value:"Resource that handles the HTTP POST requests that are directed
      to the path '/orders' to create a new Order."}
     @http:ResourceConfig {
@@ -419,3 +422,11 @@ Refer [here](https://github.com/ballerina-guides/restful-service#deployment) for
 
 
 ## Output
+
+You will see a log line as shown below, when you invoke the service by satisfying one of the 
+criteria for alert.
+
+```
+ALERT!! : Received more than 10 requests from the host within 10 seconds: localhost:9090
+
+```
