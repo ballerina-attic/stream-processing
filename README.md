@@ -44,7 +44,7 @@ Each streaming query within forever block is an isolated processing unit that in
 
 Multiple streaming queries can sit together inside a single Forever statement block. Please refer the grammar below.
 
-```
+```antlrv4
 foreverStatement
     :   FOREVER LEFT_BRACE  streamingQueryStatement+ RIGHT_BRACE
     ;   
@@ -125,6 +125,86 @@ The above creates a stream named `employeeStream` that constrained by `Employee`
 + `name` of type `string`
 + `age` of type `int` 
 + `status` of type `string` 
+
+### Query
+
+Each streaming query can consume one or more streams, process the events in a streaming manner, and then generate an
+ output.
+
+**Purpose**
+
+A query enables you to perform complex event processing and stream processing operations by processing incoming events 
+one by one in the order they arrive.
+
+**Syntax**
+
+All queries contain an input and an output section. Some also contain a projection section. A simple query with all 
+three sections is as follows.
+
+```sql
+from <input stream> 
+select <attribute name>, <attribute name>, ...
+=> (<array type> <parameter name>) {
+      ...
+      ...
+}
+```
+
+**Example**
+
+This query consumes events from the `TempStream` stream (that is already defined) and outputs the room temperature and the room number to the `RoomTempStream` stream.
+
+```sql
+type temperature{
+  int deviceID;
+  int roomNo;
+  float value;  
+}
+
+type roomTemperature{
+  int roomNo;
+  float value;  
+}
+
+stream<temperature> tempStream;
+
+
+from tempStream 
+select roomNo, value
+=> (roomTemperature[] temperature){
+
+      //Do whatever with the output event  
+      
+}
+```
+
+## What you'll build
+
+For better understand understanding let's take a real world usecase and implement that using Ballerina streaming features.
+
+Let's assume, that you are a API developer and you have published few APIs to the API store. There are subscribers who
+are subscribed to those APIs as well. At this situation, you wanted to build an alert generation mechanism which send
+you an alert in below conditions.
+
+- API request from a black listed user IP
+- No of API requests from same IP is greater than 10 in 10 seconds.
+
+
+## Prerequisites
+ 
+- JDK 1.8 or later
+- [Ballerina Distribution](https://github.com/ballerina-lang/ballerina/blob/master/docs/quick-tour.md)
+- A Text Editor or an IDE 
+
+### Optional requirements
+- Ballerina IDE plugins ([IntelliJ IDEA](https://plugins.jetbrains.com/plugin/9520-ballerina), [VSCode](https://marketplace.visualstudio.com/items?itemName=WSO2.Ballerina), [Atom](https://atom.io/packages/language-ballerina))
+- [Docker](https://docs.docker.com/engine/installation/)
+
+
+## Developing queries
+
+
+
 
 
 
