@@ -180,16 +180,16 @@ select roomNo, value
 
 ## What you'll build
 
-For better understand understanding let's take a real world usecase and implement that using Ballerina streaming features.
+For better understand let's take a real world usecase and implement that using Ballerina streaming features.
 
 Let's assume, that you are a API developer and you have published few APIs to the API store. There are subscribers who
 are subscribed to those APIs as well. 
 
 Here, we are focusing on below scenario where we have a order management service which allow to add order. At this 
-situation, you wanted to build an alert generation mechanism which send  you an alert in below conditions. 
+situation, you wanted to build an alert generation mechanism which send you an alert in below conditions. 
 
 - API/Service request from a black listed user IP
-- No of API/Service requests from same IP is greater than 10 in 10 seconds. 
+- No of API/Service requests is greater than 10 in 10 seconds from same IP 
 
 -- Need a Diagram
 
@@ -413,7 +413,7 @@ running a ballerina programs on Kubernetes, with the use of Kubernetes annotatio
 your service code. Also, it will take care of the creation of the docker images. So you don't need to explicitly create 
 docker images prior to deploying it on Kubernetes. 
 
-Refer[here](https://github.com/ballerina-guides/restful-service#deployment) for more deployment options.
+Refer [here](https://github.com/ballerina-guides/restful-service#deployment) for more deployment options.
 
 
 ## Output
