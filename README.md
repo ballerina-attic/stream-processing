@@ -183,11 +183,15 @@ select roomNo, value
 For better understand understanding let's take a real world usecase and implement that using Ballerina streaming features.
 
 Let's assume, that you are a API developer and you have published few APIs to the API store. There are subscribers who
-are subscribed to those APIs as well. At this situation, you wanted to build an alert generation mechanism which send
-you an alert in below conditions.
+are subscribed to those APIs as well. 
 
-- API request from a black listed user IP
-- No of API requests from same IP is greater than 10 in 10 seconds.
+Here, we are focusing on below scenario where we have a order management service which allow to add order. At this 
+situation, you wanted to build an alert generation mechanism which send  you an alert in below conditions. 
+
+- API/Service request from a black listed user IP
+- No of API/Service requests from same IP is greater than 10 in 10 seconds. 
+
+-- Need a Diagram
 
 
 ## Prerequisites
@@ -275,7 +279,7 @@ function initRealtimeRequestCounter () {
     forever {
         from requestStream
         window time(10000)
-        select host, count(host) as count group by host having count > 5
+        select host, count(host) as count group by host having count > 10
         => (RequestCount [] counts) {
                 //The 'counts' is the output of the streaming rules and is published to the `requestCountStream`.
                 //The `select` clause should match the structure of the 'RequestCount' struct.
@@ -286,7 +290,7 @@ function initRealtimeRequestCounter () {
 
 // Define the `printRequestCount` function.
 function printRequestCount (RequestCount reqCount) {
-    io:println("ALERT!! : Received more than 6 requests from the host within 5 seconds: " + reqCount.host);
+    io:println("ALERT!! : Received more than 10 requests from the host within 10 seconds: " + reqCount.host);
 }
 
 ```
@@ -326,30 +330,6 @@ map<json> ordersMap;
 @http:ServiceConfig {basePath:"/ordermgt"}
 service<http:Service> order_mgt bind listener {
 
-    @Description {value:"Resource that handles the HTTP GET requests that are directed
-    to a specific order using path '/orders/<orderID>'"}
-    @http:ResourceConfig {
-        methods:["GET"],
-        path:"/order/{orderId}"
-    }
-    findOrder(endpoint client, http:Request req, string orderId) {
-	string hostName = untaint req.getHeader("Host");
-	sendRequestEventToStream(hostName);	
-
-        // Find the requested order from the map and retrieve it in JSON format.
-        json? payload = ordersMap[orderId];
-        http:Response response;
-        if (payload == null) {
-            payload = "Order : " + orderId + " cannot be found.";
-        }
-
-        // Set the JSON payload in the outgoing response message.
-        response.setJsonPayload(payload);
-
-        // Send response to the client.
-        _ = client -> respond(response);
-    }
-
     @Description {value:"Resource that handles the HTTP POST requests that are directed
      to the path '/orders' to create a new Order."}
     @http:ResourceConfig {
@@ -379,64 +359,61 @@ service<http:Service> order_mgt bind listener {
         // Send response to the client.
         _ = client -> respond(response);
     }
-
-    @Description {value:"Resource that handles the HTTP PUT requests that are directed
-    to the path '/orders' to update an existing Order."}
-    @http:ResourceConfig {
-        methods:["PUT"],
-        path:"/order/{orderId}"
-    }
-    updateOrder(endpoint client, http:Request req, string orderId) {
-
-	string hostName = untaint req.getHeader("Host");
-	sendRequestEventToStream(hostName);	
-
-        json updatedOrder = check req.getJsonPayload();
-
-        // Find the order that needs to be updated and retrieve in JSON format.
-        json existingOrder = ordersMap[orderId];
-
-        // Updating existing order with the attributes of the updated order.
-        if (existingOrder != null) {
-            existingOrder.Order.Name = updatedOrder.Order.Name;
-            existingOrder.Order.Description = updatedOrder.Order.Description;
-            ordersMap[orderId] = existingOrder;
-        } else {
-            existingOrder = "Order : " + orderId + " cannot be found.";
-        }
-
-        http:Response response;
-        // Set the JSON payload to the outgoing response message to the client.
-        response.setJsonPayload(existingOrder);
-        // Send response to the client.
-        _ = client -> respond(response);
-    }
-
-    @Description {value:"Resource that handles the HTTP DELETE requests, which are
-    directed to the path '/orders/<orderId>' to delete an existing Order."}
-    @http:ResourceConfig {
-        methods:["DELETE"],
-        path:"/order/{orderId}"
-    }
-    cancelOrder(endpoint client, http:Request req, string orderId) {
-
-	string hostName = untaint req.getHeader("Host");
-	sendRequestEventToStream(hostName);	
-
-        http:Response response;
-        // Remove the requested order from the map.
-        _ = ordersMap.remove(orderId);
-
-        json payload = "Order : " + orderId + " removed.";
-        // Set a generated payload with order status.
-        response.setJsonPayload(payload);
-
-        // Send response to the client.
-        _ = client -> respond(response);
-    }
 }
 
 ```
 
 - With that we've completed the development of the order_mgt_service and api_alert implementation. 
 
+## Testing 
+
+As mentioned in previous steps, we have to invoke above developed order management service to get the alert generated 
+from streaming queries. Either, we have to send more than 10 requests from same host with in 10 seconds or make a
+service request from a blacklisted host to get an alert generate.
+
+
+### Invoking the service 
+
+You can run the service that you developed above, in your local environment. Open your terminal and navigate to 
+`<SAMPLE_ROOT_DIRECTORY>/streaming-service` and execute the following command.
+
+```
+$ballerina run api-alerting
+```
+NOTE: You need to have the Ballerina installed in you local machine to run the Ballerina service.  
+
+You can test the functionality of the order management service by sending HTTP request to 'order' operation. 
+For example, we have used the curl commands to test each operation of OrderMgtService as follows. 
+
+**Create Order** 
+```
+curl -v -X POST -d \
+'{ "Order": { "ID": "100500", "Name": "XYZ", "Description": "Sample order."}}' \
+"http://localhost:9090/ordermgt/order" -H "Content-Type:application/json"
+
+Output :  
+< HTTP/1.1 201 Created
+< Content-Type: application/json
+< Location: http://localhost:9090/ordermgt/order/100500
+< Transfer-Encoding: chunked
+< Server: wso2-http-transport
+
+{"status":"Order Created.","orderId":"100500"} 
+```
+
+### Deploying on Docker
+
+You can run the service that we developed above as a docker container. As Ballerina platform offers native support for 
+running ballerina programs on containers, you just need to put the corresponding docker annotations on your service code. 
+
+### Deploying on Kubernetes
+
+- You can run the service that we developed above, on Kubernetes. The Ballerina language offers native support for 
+running a ballerina programs on Kubernetes, with the use of Kubernetes annotations that you can include as part of 
+your service code. Also, it will take care of the creation of the docker images. So you don't need to explicitly create 
+docker images prior to deploying it on Kubernetes. 
+
+Refer[here](https://github.com/ballerina-guides/restful-service#deployment) for more deployment options.
+
+
+## Output
