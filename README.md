@@ -12,7 +12,7 @@ The following are the sections available in this guide.
 - [Developing queries](#developing-queries)
 - [Testing](#testing)
 - [Deployment](#deployment)
-- [Output](#)  
+- [Output](#output)  
  
 ## Overview 
 
@@ -404,6 +404,34 @@ Output :
 < Server: wso2-http-transport
 
 {"status":"Order Created.","orderId":"100500"} 
+```
+
+## Deployment
+
+Once you are done with the development, you can deploy the service using any of the methods that we listed below. 
+
+### Deploying locally
+
+- As the first step you can build a Ballerina executable archive (.balx) of the service that we developed above, 
+using the following command. It points to the directory in which the service we developed above located and it will 
+create an executable binary out of that. Navigate to the `<SAMPLE_ROOT>/api-alerting/` folder and run the following command. 
+
+```
+$ballerina build api-alerting
+```
+
+- Once the api-alerting.balx is created inside the target folder, you can run that with the following command. 
+
+```
+$ballerina run target/api-alerting.balx
+```
+
+- The successful execution of the service should show us the following output. 
+```
+$ ballerina run target/api-alerting.balx 
+
+ballerina: deploying service(s) in 'target/api-alerting.balx'
+ballerina: started HTTP/WS server connector 0.0.0.0:9090
 ```
 
 ### Deploying on Docker
