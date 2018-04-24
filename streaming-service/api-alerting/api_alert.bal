@@ -10,17 +10,6 @@ type RequestCount {
     int count;
 };
 
-endpoint gmail:Client gMailEP {
-    clientConfig:{
-        auth:{
-            accessToken:"access-token",
-            clientId:"client-id",
-            clientSecret:"client-secret",
-            refreshToken:"refresh-token"
-        }
-    }
-};
-
 stream<ClientRequest> requestStream;
 
 function initRealtimeRequestCounter () {
@@ -51,25 +40,5 @@ function initRealtimeRequestCounter () {
 
 // Define the `alertRequestCount` function.
 function alertRequestCount (RequestCount reqCount) {
-    gmail:MessageRequest messageRequest;
-    messageRequest.recipient = "recipient@mail.com";
-    messageRequest.sender = "sender@mail.com";
-    messageRequest.subject = "Too many orders!!";
-    messageRequest.messageBody = "Received more than 10 requests from the host within 10 seconds: " + reqCount.host;
-    //Set the content type of the mail as TEXT_PLAIN or TEXT_HTML.
-    messageRequest.contentType = gmail:TEXT_PLAIN;
-
-    //Call the GMail endpoint function sendMessage().
-    var sendMessageResponse = gMailEP -> sendMessage("me", messageRequest);
-    match sendMessageResponse {
-        (string, string) sendStatus => {
-            //For a successful message request, returns message and thread id.
-            string messageId;
-            string threadId;
-            (messageId, threadId) = sendStatus;
-            io:println("Sent Message Id : " + messageId);
-            io:println("Sent Thread Id : " + threadId);
-        }
-        gmail:GMailError e => io:println(e); //For unsuccessful attempts, returns GMail Error.
-    }
+    io:println("ALERT!! : Received more than 10 requests within 10 seconds from the host: " + reqCount.host);
 }
