@@ -178,6 +178,167 @@ select roomNo, value
 }
 ```
 
+
+#### Query Projection
+
+Streaming queries supports the following for query projections.
+
+<table style="width:100%">
+    <tr>
+        <th>Action</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td>Selecting required objects for projection</td>
+        <td>This involves selecting only some of the attributes from the input stream to be inserted into an output stream.
+            <br><br>
+            E.g., The following query selects only the `roomNo` and `temp` attributes from the `TempStream` stream.
+            <pre style="align:left">from TempStream<br>select roomNo, temp<br>=> ( ) { <br/><br/>}</pre>
+        </td>
+    </tr>
+    <tr>
+        <td>Selecting all attributes for projection</td>
+        <td>Selecting all the attributes in an input stream to be inserted into an output stream. This can be done by using asterisk ( * ) or by omitting the `select` statement.
+            <br><br>
+            E.g., Both the following queries select all the attributes in the `TempStream` stream.
+            <pre>from TempStream<br>select *<br>=> ( ) { <br/><br/>}</pre>
+            or
+            <pre>from TempStream<br>=> ( ) { <br/><br/>}</pre>
+        </td>
+    </tr>
+    <tr>
+        <td>Renaming attributes</td>
+        <td>This selects attributes from the input streams and inserts them into the output stream with different names.
+            <br><br>
+            E.g., This query renames `roomNo` to `roomNumber` and `temp` to `temperature`.
+            <pre>from TempStream <br>select roomNo as roomNumber, temp as temperature<br>=> ( ) { <br/><br/>}</pre>
+        </td>
+    </tr>
+    <tr>
+        <td>Introducing the constant value</td>
+        <td>This adds constant values by assigning it to an attribute using `as`.
+            <br></br>
+            E.g., This query specifies 'C' to be used as the constant value for `scale` attribute. 
+            <pre>from TempStream<br>select roomNo, temp, 'C' as scale<br>=> ( ) { <br/><br/>}</pre>
+        </td>
+    </tr>
+    <tr>
+        <td>Using mathematical and logical expressions</td>
+        <td>This uses attributes with mathematical and logical expressions in the precedence order given below, and assigns them to the output attribute using `as`.
+            <br><br>
+            <b>Operator precedence</b><br>
+            <table style="width:100%">
+                <tr>
+                    <th>Operator</th>
+                    <th>Distribution</th>
+                    <th>Example</th>
+                </tr>
+                <tr>
+                    <td>
+                        ()
+                    </td>
+                    <td>
+                        Scope
+                    </td>
+                    <td>
+                        <pre>(cost + tax) * 0.05</pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                         == NULL
+                    </td>
+                    <td>
+                        Null check
+                    </td>
+                    <td>
+                        <pre>deviceID == null</pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        !
+                    </td>
+                    <td>
+                        Logical NOT
+                    </td>
+                    <td>
+                        <pre>! (price > 10)</pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                         *   /   %  
+                    </td>
+                    <td>
+                        Multiplication, division, modulo
+                    </td>
+                    <td>
+                        <pre>temp * 9/5 + 32</pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        +   -  
+                    </td>
+                    <td>
+                        Addition, substraction
+                    </td>
+                    <td>
+                        <pre>temp * 9/5 - 32</pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <   <=   >   >=
+                    </td>
+                    <td>
+                        Comparators: less-than, greater-than-equal, greater-than, less-than-equal
+                    </td>
+                    <td>
+                        <pre>totalCost >= price * quantity</pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        ==   !=  
+                    </td>
+                    <td>
+                        Comparisons: equal, not equal
+                    </td>
+                    <td>
+                        <pre>totalCost !=  price * quantity</pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        AND
+                    </td>
+                    <td>
+                        Logical AND
+                    </td>
+                    <td>
+                        <pre>temp < 40 and (humidity < 40 or humidity >= 60)</pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        OR
+                    </td>
+                    <td>
+                        Logical OR
+                    </td>
+                    <td>
+                        <pre>temp < 40 or (humidity < 40 and humidity >= 60)</pre>
+                    </td>
+                </tr>
+            </table>
+            E.g., Converting Celsius to Fahrenheit and identifying rooms with room number between 10 and 15 as server rooms.
+            <pre>from TempStream<br>select roomNo, temp * 9/5 + 32 as temp, 'F' as scale, roomNo > 10 and roomNo < 15 as isServerRoom<br>=> (RoomFahrenheit [] events ) { <br/><br/>}</pre>
+    </tr>
+    
+</table>
+
 ## What you'll build
 
 For better understand let's take a real world usecase and implement that using Ballerina streaming features.
