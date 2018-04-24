@@ -6,13 +6,23 @@ comprehensive streaming usecase with Ballerina Streams.
 
 The following are the sections available in this guide.
 
-- [Overview on Ballerina Streams](#overview)
-- [What you'll build](#what-youll-build)
-- [Prerequisites](#prerequisites)
-- [Developing queries](#developing-queries)
-- [Testing](#testing)
-- [Deployment](#deployment)
-- [Output](#output)  
+* [Overview on Ballerina Streams](#overview)
+    * [Stream](#stream)
+    * [Forever Statement](#forever-statement)
+    * [Query](#query)
+        * [Query Projection](#query-projection)
+        * [Filter](#filter)
+        * [Window](#window)
+        * [Aggregation Function](#aggregate-function)
+        * [Group By](#group-by)
+        * [Having](#having)
+        * [Order By](#order-by)
+* [What you'll build](#what-youll-build)
+* [Prerequisites](#prerequisites)
+* [Developing queries](#developing-queries)
+* [Testing](#testing)
+* [Deployment](#deployment)
+* [Output](#output)
  
 ## Overview 
 
