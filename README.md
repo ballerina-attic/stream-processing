@@ -65,8 +65,8 @@ stream, group the 10 teachers based on their marital status, and calculate the u
 teachers. Once the query is executed, publish the result to the `filteredStatusCountStream` stream.
 
 ```sql
-    forever{
-        from teacherStream where age > 18 window lengthBatch(3)
+    forever {
+        from teacherStream where age > 18 window lengthBatch (3)
         select status, count(status) as totalCount
         group by status
         having totalCount > 1
@@ -155,13 +155,13 @@ select <attribute name>, <attribute name>, ...
 This query consumes events from the `TempStream` stream (that is already defined) and outputs the room temperature and the room number to the `RoomTempStream` stream.
 
 ```sql
-type temperature{
+type temperature {
   int deviceID;
   int roomNo;
   float value;  
 }
 
-type roomTemperature{
+type roomTemperature {
   int roomNo;
   float value;  
 }
@@ -171,7 +171,7 @@ stream<temperature> tempStream;
 
 from tempStream 
 select roomNo, value
-=> (roomTemperature[] temperature){
+=> (roomTemperature[] temperature) {
 
       //Do whatever with the output event  
       
@@ -272,8 +272,8 @@ function initRealtimeRequestCounter () {
     //the `printRequestCount` function is invoked.
     requestCountStream.subscribe(printRequestCount);
 
-    //Gather all the events that are coming to requestStream for five seconds, group them by the host, count the number
-    //of requests per host, and check if the count is more than six. If yes, publish the output (host and the count) to
+    //Gather all the events that are coming to requestStream for ten seconds, group them by the host, count the number
+    //of requests per host, and check if the count is more than ten. If yes, publish the output (host and the count) to
     //the `requestCountStream` stream as an alert. This `forever` block is executed once, when initializing the service.
     // The processing happens asynchronously each time the `requestStream` receives an event.
     forever {
@@ -370,7 +370,58 @@ service<http:Service> order_mgt bind listener {
 
 - With that we've completed the development of the order_mgt_service and api_alert implementation. 
 
-## Testing 
+### Customize the streaming queries to send email alerts
+
+In Above implementation, we simply generate a log to the stdout. An extended version of the above implementation would
+be, sending the alert as an email. Following shows you how to configure the gmail connector to send email as alerts.
+
+- Add following code fragment to api_alert.bal as a global variable (in the same scope the ClientRequest and RequestCount types are defined).
+For more information on how ballerina gmail connector is configured, please refer [here](https://github.com/wso2-ballerina/package-gmail/blob/master/Readme.md)
+You have to replace "access-token", "client-id", "client-secret", "refresh-token" with your OAuth credentials.
+For more information on Google OAuth 2.0 applications, please refer [here](https://developers.google.com/identity/protocols/OAuth2)
+
+```ballerina
+endpoint gmail:Client gMailEP {
+    clientConfig:{
+        auth:{
+            accessToken:"access-token",
+            clientId:"client-id",
+            clientSecret:"client-secret",
+            refreshToken:"refresh-token"
+        }
+    }
+};
+```
+
+- Replace the function body of 'printRequestCount' with the following code fragment. Then instead of printing a log,
+the program will send an email alert to the respective receipient.
+you have to replace the recipient@mail.com and sender@mail.com with a correct reciepient and sender email addresses.
+
+```ballerina
+gmail:MessageRequest messageRequest;
+messageRequest.recipient = "recipient@mail.com";
+messageRequest.sender = "sender@mail.com";
+messageRequest.subject = "Too many orders!!";
+messageRequest.messageBody = "Received more than 10 requests from the host within 10 seconds: " + reqCount.host;
+//Set the content type of the mail as TEXT_PLAIN or TEXT_HTML.
+messageRequest.contentType = gmail:TEXT_PLAIN;
+
+//Call the GMail endpoint function sendMessage().
+var sendMessageResponse = gMailEP -> sendMessage("me", messageRequest);
+match sendMessageResponse {
+    (string, string) sendStatus => {
+        //For a successful message request, returns message and thread id.
+        string messageId;
+        string threadId;
+        (messageId, threadId) = sendStatus;
+        io:println("Sent Message Id : " + messageId);
+        io:println("Sent Thread Id : " + threadId);
+    }
+    gmail:GMailError e => io:println(e); //For unsuccessful attempts, returns GMail Error.
+}
+```
+
+## Testing
 
 As mentioned in previous steps, we have to invoke above developed order management service to get the alert generated 
 from streaming queries. Either, we have to send more than 10 requests from same host with in 10 seconds or make a

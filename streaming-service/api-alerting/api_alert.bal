@@ -1,4 +1,5 @@
 import ballerina/io;
+import wso2/gmail;
 
 type ClientRequest {
     string host;
@@ -17,10 +18,10 @@ function initRealtimeRequestCounter () {
 
     //Whenever the `requestCountStream` stream receives an event from the streaming rules defined in the `forever` block,
     //the `printRequestCount` function is invoked.
-    requestCountStream.subscribe(printRequestCount);
+    requestCountStream.subscribe(alertRequestCount);
 
-    //Gather all the events that are coming to requestStream for five seconds, group them by the host, count the number
-    //of requests per host, and check if the count is more than six. If yes, publish the output (host and the count) to
+    //Gather all the events that are coming to requestStream for ten seconds, group them by the host, count the number
+    //of requests per host, and check if the count is more than 10. If yes, publish the output (host and the count) to
     //the `requestCountStream` stream as an alert. This `forever` block is executed once, when initializing the service.
     // The processing happens asynchronously each time the `requestStream` receives an event.
     forever {
@@ -37,7 +38,7 @@ function initRealtimeRequestCounter () {
     }
 }
 
-// Define the `printRequestCount` function.
-function printRequestCount (RequestCount reqCount) {
-    io:println("ALERT!! : Received more than 10 requests from the host within 10 seconds: " + reqCount.host);
+// Define the `alertRequestCount` function.
+function alertRequestCount (RequestCount reqCount) {
+    io:println("ALERT!! : Received more than 10 requests within 10 seconds from the host: " + reqCount.host);
 }
