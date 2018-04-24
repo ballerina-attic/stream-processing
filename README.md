@@ -17,6 +17,7 @@ The following are the sections available in this guide.
         * [Group By](#group-by)
         * [Having](#having)
         * [Order By](#order-by)
+        * [Join](#join)
 * [What you'll build](#what-youll-build)
 * [Prerequisites](#prerequisites)
 * [Developing queries](#developing-queries)
@@ -610,6 +611,117 @@ order by avgTemp, roomNo descending
     avgTempStream.publish(values);
 }
 ```
+
+#### Join
+Joins allow you to get a combined result from two streams in real-time based on a specified condition.
+
+**Purpose**
+
+Streams are stateless. Therefore, in order to join two streams, they need to be connected to a window
+so that there is a pool of events that can be used for joining. Joins also accept conditions to join
+the appropriate events from each stream.
+
+During the joining process each incoming event of each stream is matched against all the events in the other
+stream's window based on the given condition, and the output events are generated for all the matching event pairs.
+
+
+**Syntax**
+
+The syntax for a join is as follows:
+
+```sql
+from <input stream> window <window name>(<parameter>, ... ) {unidirectional} {as <reference>}
+         join <input stream> window <window name>(<parameter>,  ... ) {unidirectional} {as <reference>}
+    on <join condition>
+select <attribute name>, <attribute name>, ...
+=> ( ) {
+
+}
+```
+Here, the `<join condition>` allows you to match the attributes from both the streams.
+
+**Unidirectional join operation**
+
+By default, events arriving at either stream can trigger the joining process. However, if you want to control the
+join execution, you can add the `unidirectional` keyword next to a stream in the join definition as depicted in the
+syntax in order to enable that stream to trigger the join operation. Here, events arriving at other stream only update the
+ window of that stream, and this stream does not trigger the join operation.
+
+Note : The `unidirectional` keyword cannot be applied to both the input streams because the default
+behaviour already allows both streams to trigger the join operation.
+
+**Example**
+
+Assuming that the temperature of regulators are updated every minute.
+Following is a Siddhi App that controls the temperature regulators if they are not already `on`
+for all the rooms with a room temperature greater than 30 degrees.
+
+```sql
+from tempStream where (temp > 30.0) window time(60000) as T
+  join regulatorStream where (isOn == false) window length(1) as R
+  on T.roomNo == R.roomNo
+select T.roomNo, R.deviceID, 'start' as action
+=> (RegulatorAction [] values) {
+    regulatorActionStream.publish(values);
+}
+```
+
+**Supported join types**
+
+Following are the supported operations of a join clause.
+
+ *  **Inner join (join)**
+
+    This is the default behaviour of a join operation. `join` is used as the keyword to join both
+    the streams. The output is generated only if there is a matching event in both the streams.
+
+ *  **Left outer join**
+
+    The left outer join operation allows you to join two streams to be merged based on a condition.
+    `left outer join` is used as the keyword to join both the streams.
+
+    Here, it returns all the events of left stream even if there are no matching events in the right
+    stream by having null values for the attributes of the right stream.
+
+     **Example**
+
+    The following query generates output events for all events from the `stockStream` stream
+    regardless of whether a matching symbol exists in the `twitterStream` stream or not.
+
+    <pre>
+    from stockStream window time(60000) as S
+      left outer join twitterStream window length(1) as T
+      on S.symbol== T.symbol
+    select S.symbol as symbol, T.tweet, S.price
+    => ( ) {
+
+    }   </pre>
+
+ *  **Right outer join**
+
+    This is similar to a left outer join. `Right outer join` is used as the keyword to join both
+    the streams. It returns all the events of the right stream even if there are no matching events
+    in the left stream.
+
+ *  **Full outer join**
+
+    The full outer join combines the results of left outer join and right outer join. `full outer join` is used as the keyword to join both the streams.
+    Here, output event are generated for each incoming event even if there are no matching events in
+    the other stream.
+
+    **Example**
+
+    The following query generates output events for all the incoming events of each stream regardless of whether there is a
+    match for the `symbol` attribute in the other stream or not.
+
+    <pre>
+    from stockStream window time(60000) as S
+      full outer join twitterStream window length(1) as T
+      on S.symbol== T.symbol
+    select S.symbol as symbol, T.tweet, S.price
+    => ( ) {
+
+    }    </pre>
 
 
 ## What you'll build
