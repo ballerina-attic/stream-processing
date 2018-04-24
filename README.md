@@ -6,13 +6,23 @@ comprehensive streaming usecase with Ballerina Streams.
 
 The following are the sections available in this guide.
 
-- [Overview on Ballerina Streams](#overview)
-- [What you'll build](#what-youll-build)
-- [Prerequisites](#prerequisites)
-- [Developing queries](#developing-queries)
-- [Testing](#testing)
-- [Deployment](#deployment)
-- [Output](#output)  
+* [Overview on Ballerina Streams](#overview)
+    * [Stream](#stream)
+    * [Forever Statement](#forever-statement)
+    * [Query](#query)
+        * [Query Projection](#query-projection)
+        * [Filter](#filter)
+        * [Window](#window)
+        * [Aggregation Function](#aggregate-function)
+        * [Group By](#group-by)
+        * [Having](#having)
+        * [Order By](#order-by)
+* [What you'll build](#what-youll-build)
+* [Prerequisites](#prerequisites)
+* [Developing queries](#developing-queries)
+* [Testing](#testing)
+* [Deployment](#deployment)
+* [Output](#output)
  
 ## Overview 
 
@@ -31,50 +41,6 @@ Ballerina Streaming supports the following:
 * Analyzing trends (rise, fall, turn, tipple bottom)
 * And many more ...  
 
-
-### Forever Statement
-Streaming processing and Complex Event Processing rules can be written in side the forever statement block. Multiple
-streaming queries can put together in a single Forever block. 
-
-**Purpose**
-
-Each streaming query within forever block is an isolated processing unit that independent to each other.
-
-**Grammar**
-
-Multiple streaming queries can sit together inside a single Forever statement block. Please refer the grammar below.
-
-```antlrv4
-foreverStatement
-    :   FOREVER LEFT_BRACE  streamingQueryStatement+ RIGHT_BRACE
-    ;   
-    
-streamingQueryStatement
-    :   FROM (streamingInput (joinStreamingInput)? | patternClause)
-        selectClause?
-        orderByClause?
-        outputRateLimit?
-        streamingAction
-    ;        
-```
-
-**Example**
-
-Query to filter out the teachers who are older than 30 years, wait until three teacher objects are collected by the 
-stream, group the 10 teachers based on their marital status, and calculate the unique marital status count of the 
-teachers. Once the query is executed, publish the result to the `filteredStatusCountStream` stream.
-
-```sql
-    forever {
-        from teacherStream where age > 18 window lengthBatch (3)
-        select status, count(status) as totalCount
-        group by status
-        having totalCount > 1
-        => (StatusCount [] status) {
-                filteredStatusCountStream.publish(status);
-        }
-    }
-```
 
 ### Stream
 A stream is a logical series of events ordered in time. Its schema is defined/constrained via the **object definition**.
@@ -126,6 +92,50 @@ The above creates a stream named `employeeStream` that constrained by `Employee`
 + `age` of type `int` 
 + `status` of type `string` 
 
+### Forever Statement
+Stream processing and Complex Event Processing rules can be written in side the forever statement block. Multiple
+streaming queries can put together in a single Forever block.
+
+**Purpose**
+
+Each streaming query within forever block is an isolated processing unit that independent to each other.
+
+**Grammar**
+
+Multiple streaming queries can sit together inside a single Forever statement block. Please refer the grammar below.
+
+```antlrv4
+foreverStatement
+    :   FOREVER LEFT_BRACE  streamingQueryStatement+ RIGHT_BRACE
+    ;
+
+streamingQueryStatement
+    :   FROM (streamingInput (joinStreamingInput)? | patternClause)
+        selectClause?
+        orderByClause?
+        outputRateLimit?
+        streamingAction
+    ;
+```
+
+**Example**
+
+Query to filter out the teachers who are older than 30 years, wait until three teacher objects are collected by the
+stream, group the 10 teachers based on their marital status, and calculate the unique marital status count of the
+teachers. Once the query is executed, publish the result to the `filteredStatusCountStream` stream.
+
+```sql
+    forever {
+        from teacherStream where age > 18 window lengthBatch (3)
+        select status, count(status) as totalCount
+        group by status
+        having totalCount > 1
+        => (StatusCount [] status) {
+                filteredStatusCountStream.publish(status);
+        }
+    }
+```
+
 ### Query
 
 Each streaming query can consume one or more streams, process the events in a streaming manner, and then generate an
@@ -152,7 +162,7 @@ select <attribute name>, <attribute name>, ...
 
 **Example**
 
-This query consumes events from the `TempStream` stream (that is already defined) and outputs the room temperature and the room number to the `RoomTempStream` stream.
+This query consumes events from the `tempStream` stream (that is already defined) and outputs the room temperature and the room number to the `roomTempStream` stream.
 
 ```sql
 type temperature {
@@ -178,6 +188,430 @@ select roomNo, value
 }
 ```
 
+
+#### Query Projection
+
+Streaming queries supports the following for query projections.
+
+<table style="width:100%">
+    <tr>
+        <th>Action</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td>Selecting required objects for projection</td>
+        <td>This involves selecting only some of the attributes from the input stream to be inserted into an output stream.
+            <br><br>
+            E.g., The following query selects only the `roomNo` and `temp` attributes from the `tempStream` stream.
+            <pre style="align:left">from tempStream<br>select roomNo, temp<br>=> ( ) { <br/><br/>}</pre>
+        </td>
+    </tr>
+    <tr>
+        <td>Selecting all attributes for projection</td>
+        <td>Selecting all the attributes in an input stream to be inserted into an output stream. This can be done by using asterisk ( * ) or by omitting the `select` statement.
+            <br><br>
+            E.g., Both the following queries select all the attributes in the `tempStream` stream.
+            <pre>from tempStream<br>select *<br>=> ( ) { <br/><br/>}</pre>
+            or
+            <pre>from tempStream<br>=> ( ) { <br/><br/>}</pre>
+        </td>
+    </tr>
+    <tr>
+        <td>Renaming attributes</td>
+        <td>This selects attributes from the input streams and inserts them into the output stream with different names.
+            <br><br>
+            E.g., This query renames `roomNo` to `roomNumber` and `temp` to `temperature`.
+            <pre>from tempStream <br>select roomNo as roomNumber, temp as temperature<br>=> ( ) { <br/><br/>}</pre>
+        </td>
+    </tr>
+    <tr>
+        <td>Introducing the constant value</td>
+        <td>This adds constant values by assigning it to an attribute using `as`.
+            <br></br>
+            E.g., This query specifies 'C' to be used as the constant value for `scale` attribute. 
+            <pre>from tempStream<br>select roomNo, temp, 'C' as scale<br>=> ( ) { <br/><br/>}</pre>
+        </td>
+    </tr>
+    <tr>
+        <td>Using mathematical and logical expressions</td>
+        <td>This uses attributes with mathematical and logical expressions in the precedence order given below, and assigns them to the output attribute using `as`.
+            <br><br>
+            <b>Operator precedence</b><br>
+            <table style="width:100%">
+                <tr>
+                    <th>Operator</th>
+                    <th>Distribution</th>
+                    <th>Example</th>
+                </tr>
+                <tr>
+                    <td>
+                        ()
+                    </td>
+                    <td>
+                        Scope
+                    </td>
+                    <td>
+                        <pre>(cost + tax) * 0.05</pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                         == NULL
+                    </td>
+                    <td>
+                        Null check
+                    </td>
+                    <td>
+                        <pre>deviceID == null</pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        !
+                    </td>
+                    <td>
+                        Logical NOT
+                    </td>
+                    <td>
+                        <pre>! (price > 10)</pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                         *   /   %  
+                    </td>
+                    <td>
+                        Multiplication, division, modulo
+                    </td>
+                    <td>
+                        <pre>temp * 9/5 + 32</pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        +   -  
+                    </td>
+                    <td>
+                        Addition, substraction
+                    </td>
+                    <td>
+                        <pre>temp * 9/5 - 32</pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <   <=   >   >=
+                    </td>
+                    <td>
+                        Comparators: less-than, greater-than-equal, greater-than, less-than-equal
+                    </td>
+                    <td>
+                        <pre>totalCost >= price * quantity</pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        ==   !=  
+                    </td>
+                    <td>
+                        Comparisons: equal, not equal
+                    </td>
+                    <td>
+                        <pre>totalCost !=  price * quantity</pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        AND
+                    </td>
+                    <td>
+                        Logical AND
+                    </td>
+                    <td>
+                        <pre>temp < 40 and (humidity < 40 or humidity >= 60)</pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        OR
+                    </td>
+                    <td>
+                        Logical OR
+                    </td>
+                    <td>
+                        <pre>temp < 40 or (humidity < 40 and humidity >= 60)</pre>
+                    </td>
+                </tr>
+            </table>
+            E.g., Converting Celsius to Fahrenheit and identifying rooms with room number between 10 and 15 as server rooms.
+            <pre>from tempStream<br>select roomNo, temp * 9/5 + 32 as temp, 'F' as scale, roomNo > 10 and roomNo < 15 as isServerRoom<br>=> (RoomFahrenheit [] events ) { <br/><br/>}</pre>
+    </tr>
+    
+</table>
+
+#### Filter
+
+Filters are included in queries to filter information from input streams based on a specified condition.
+
+**Purpose**
+
+A filter allows you to separate events that match a specific condition as the output, or for further processing.
+
+**Syntax**
+
+Filter conditions should be defined with 'where' keyword next to the input stream name as shown below.
+
+```sql
+from <input stream> where <filter condition>
+select <attribute name>, <attribute name>, ...
+=> ( ) {
+
+}
+```
+
+**Example**
+
+This query filters all server rooms of which the room number is within the range of 100-210, and having temperature greater than 40 degrees
+from the `tempStream` stream, and inserts the results into the `highTempStream` stream.
+
+```sql
+from tempStream where (roomNo >= 100 and roomNo < 210) and temp > 40
+select roomNo, temp
+=> (RoomTemperature [] value) {
+    highTempStream.publish(values)
+}
+```
+
+
+#### Window
+
+Windows allow you to capture a subset of events based on a specific criterion from an input stream for calculation.
+Each input stream can only have a maximum of one window.
+
+**Purpose**
+
+To create subsets of events within a stream based on time duration, number of events, etc for processing.
+A window can operate in a sliding or tumbling (batch) manner.
+
+**Syntax**
+
+The `window` prefix should be inserted next to the relevant stream in order to use a window.
+
+```sql
+from <input stream> window <window name>(<parameter>, <parameter>, ... )
+select <attribute name>, <attribute name>, ...
+=> ( ) {
+
+}
+```
+Note : Filter condition can be applied both before and/or after the window
+
+**Example**
+
+If you want to identify the maximum temperature out of the last 10 events, you need to define a `length` window of 10 events.
+ This window operates in a sliding mode where the following 3 subsets are calculated when a list of 12 events are received in a sequential order.
+
+|Subset|Event Range|
+|------|-----------|
+| 1 | 1-10 |
+| 2 | 2-11 |
+|3| 3-12 |
+
+The following query finds the maximum temperature out of **last 10 events** from the `tempStream` stream,
+and inserts the results into the `maxTempStream` stream.
+
+```sql
+from tempStream window length(10)
+select max(temp) as maxTemp
+=> ( ) {
+
+}
+```
+
+If you define the maximum temperature reading out of every 10 events, you need to define a `lengthBatch` window of 10 events.
+This window operates as a batch/tumbling mode where the following 3 subsets are calculated when a list of 30 events are received in a sequential order.
+
+|Subset|Event Range|
+|------|-----------|
+| 1    | 1-10      |
+| 2    | 11-20     |
+| 3    | 21-30     |
+
+The following query finds the maximum temperature out of **every 10 events** from the `tempStream` stream,
+and inserts the results into the `maxTempStream` stream.
+
+```sql
+from tempStream window lengthBatch(10)
+select max(temp) as maxTemp
+=> ( ) {
+
+}
+```
+
+Note : Similar operations can be done based on time via `time` windows and `timeBatch` windows and for others.
+    Code segments such as `window time(10000)` considers events that arrive during the last 10 seconds in a sliding manner, and the `window timeBatch(2000)` considers events that arrive every 2 seconds in a tumbling manner.
+
+Following are some inbuilt windows shipped with Ballerina Streams.
+
+* time
+* timeBatch
+* timeLength
+* length
+* lengthBatch
+* sort
+* frequent
+* lossyFrequent
+* cron
+* externalTime
+* externalTimeBatch
+
+
+#### Aggregate function
+
+Aggregate functions perform aggregate calculations in the query.
+When a window is defined the aggregation is restricted within that window. If no window is provided aggregation is performed from the start.
+
+**Syntax**
+
+```sql
+from <input stream> window <window name>(<parameter>, <parameter>, ... )
+select <aggregate function>(<parameter>, <parameter>, ... ) as <attribute name>, <attribute2 name>, ...
+=> ( ) {
+
+}
+```
+
+**Aggregate Parameters**
+
+Aggregate parameters can be attributes, constant values, results of other functions or aggregates, results of mathematical or logical expressions, or time parameters.
+Aggregate parameters configured in a query  depends on the aggregate function being called.
+
+**Example**
+
+The following query calculates the average value for the `temp` attribute of the `tempStream` stream. This calculation is done for the last 10 minutes in a sliding manner, and the result is output as `avgTemp` to the `avgTempStream` output stream.
+
+```sql
+from tempStream window time(600000)
+select avg(temp) as avgTemp, roomNo, deviceID
+=> (AvgTemperature [] values) {
+    avgTempStream.publish(values);
+}
+```
+Following are some inbuilt aggregation functions shipped with Ballerina, for more aggregation functions, see execution.
+
+* avg
+* sum
+* max
+* min
+* count
+* distinctCount
+* maxForever
+* minForever
+* stdDev
+
+
+#### Group By
+
+Group By allows you to group the aggregate based on specified attributes.
+
+**Syntax**
+
+The syntax for the Group By aggregate function is as follows:
+
+```sql
+from <input stream> window <window name>(...)
+select <aggregate function>( <parameter>, <parameter>, ...) as <attribute1 name>, <attribute2 name>, ...
+group by <attribute1 name>, <attribute2 name> ...
+=> ( ) {
+
+}
+```
+
+**Example**
+
+The following query calculates the average temperature per `roomNo` and `deviceID` combination, for events that arrive at the `tempStream` stream
+for a sliding time window of 10 minutes.
+
+```sql
+from tempStream window time(600000)
+select avg(temp) as avgTemp, roomNo, deviceID
+group by roomNo, deviceID
+=> (AvgTemperature [] values) {
+    avgTempStream.publish(values);
+}
+```
+
+#### Having
+
+Having allows you to filter events after processing the `select` statement.
+
+**Purpose**
+
+This allows you to filter the aggregation output.
+
+**Syntax**
+
+The syntax for the Having clause is as follows:
+
+```sql
+from <input stream> window <window name>( ... )
+select <aggregate function>( <parameter>, <parameter>, ...) as <attribute1 name>, <attribute2 name>, ...
+group by <attribute1 name>, <attribute2 name> ...
+having <condition>
+=> ( ) {
+
+}
+```
+
+**Example**
+
+The following query calculates the average temperature per room for the last 10 minutes, and alerts if it exceeds 30 degrees.
+```sql
+from tempStream window time(600000)
+select avg(temp) as avgTemp, roomNo
+group by roomNo
+having avgTemp > 30
+=> (Alert [] values) {
+    alertStream.publish(values);
+}
+```
+
+#### Order By
+
+Order By allows you to order the aggregated result in ascending and/or descending order based on specified attributes. By default ordering will be done in
+ascending manner. User can use 'descending' keyword to order in descending manner.
+
+**Syntax**
+
+The syntax for the Order By clause is as follows:
+
+```sql
+from <input stream> window <window name>( ... )
+select <aggregate function>( <parameter>, <parameter>, ...) as <attribute1 name>, <attribute2 name>, ...
+group by <attribute1 name>, <attribute2 name> ...
+having <condition>
+order by <attribute1 name> (ascending | descending)?, <attribute2 name> (<ascend/descend>)?, ...
+=> ( ) {
+
+}
+```
+
+**Example**
+
+The following query calculates the average temperature per per `roomNo` and `deviceID` combination for every 10 minutes, and generate output events
+by ordering them in the ascending order of the room's avgTemp and then by the descending order of roomNo.
+
+```sql
+from tempStream window timeBatch(600000)
+select avg(temp) as avgTemp, roomNo, deviceID
+group by roomNo, deviceID
+order by avgTemp, roomNo descending
+=> (AvgTemperature [] values) {
+    avgTempStream.publish(values);
+}
+```
+
+
 ## What you'll build
 
 For better understand let's take a real world usecase and implement that using Ballerina streaming features.
@@ -188,7 +622,6 @@ are subscribed to those APIs as well.
 Here, we are focusing on below scenario where we have a order management service which allow to add order. At this 
 situation, you wanted to build an alert generation mechanism which send you an alert in below conditions. 
 
-- API/Service request from a black listed user IP
 - No of API/Service requests is greater than 10 in 10 seconds from same IP 
 
 -- Need a Diagram
@@ -424,8 +857,7 @@ match sendMessageResponse {
 ## Testing
 
 As mentioned in previous steps, we have to invoke above developed order management service to get the alert generated 
-from streaming queries. Either, we have to send more than 10 requests from same host with in 10 seconds or make a
-service request from a blacklisted host to get an alert generate.
+from streaming queries. We have to send more than 10 requests from same host with in 10 seconds to get an alert generated.
 
 
 ### Invoking the service 
