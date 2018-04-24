@@ -14,7 +14,7 @@ The following are the sections available in this guide.
 - [Deployment](#deployment)
 - [Output](#output)  
  
-# Overview
+## Overview 
 
 Ballerina Streaming is designed to process event streams in a streaming manner, detect complex event occurrences, 
 and notify them in real-time.
@@ -32,7 +32,7 @@ Ballerina Streaming supports the following:
 * And many more ...  
 
 
-## Stream
+### Stream
 A stream is a logical series of events ordered in time. Its schema is defined/constrained via the **object definition**.
 A object definition contains a unique name and a set of attributes with specific types and uniquely identifiable names 
 within the object. All the events that are selected to be received into a specific stream have the same schema 
@@ -82,7 +82,7 @@ The above creates a stream named `employeeStream` that constrained by `Employee`
 + `age` of type `int` 
 + `status` of type `string` 
 
-## Forever Statement
+### Forever Statement
 Stream processing and Complex Event Processing rules can be written in side the forever statement block. Multiple
 streaming queries can put together in a single Forever block.
 
@@ -126,7 +126,7 @@ teachers. Once the query is executed, publish the result to the `filteredStatusC
     }
 ```
 
-## Query
+### Query
 
 Each streaming query can consume one or more streams, process the events in a streaming manner, and then generate an
  output.
@@ -179,7 +179,7 @@ select roomNo, value
 ```
 
 
-### Query Projection
+#### Query Projection
 
 Streaming queries supports the following for query projections.
 
@@ -339,7 +339,7 @@ Streaming queries supports the following for query projections.
     
 </table>
 
-### Filter
+#### Filter
 
 Filters are included in queries to filter information from input streams based on a specified condition.
 
@@ -373,7 +373,7 @@ select roomNo, temp
 ```
 
 
-### Window
+#### Window
 
 Windows allow you to capture a subset of events based on a specific criterion from an input stream for calculation.
 Each input stream can only have a maximum of one window.
@@ -456,7 +456,7 @@ Following are some inbuilt windows shipped with Ballerina Streams.
 * externalTimeBatch
 
 
-### Aggregate function
+#### Aggregate function
 
 Aggregate functions perform aggregate calculations in the query.
 When a window is defined the aggregation is restricted within that window. If no window is provided aggregation is performed from the start.
@@ -500,7 +500,7 @@ Following are some inbuilt aggregation functions shipped with Ballerina, for mor
 * stdDev
 
 
-### Group By
+#### Group By
 
 Group By allows you to group the aggregate based on specified attributes.
 
@@ -531,7 +531,7 @@ group by roomNo, deviceID
 }
 ```
 
-### Having
+#### Having
 
 Having allows you to filter events after processing the `select` statement.
 
@@ -566,7 +566,7 @@ having avgTemp > 30
 }
 ```
 
-### Order By
+#### Order By
 
 Order By allows you to order the aggregated result in ascending and/or descending order based on specified attributes. By default ordering will be done in
 ascending manner. User can use 'descending' keyword to order in descending manner.
@@ -602,7 +602,7 @@ order by avgTemp, roomNo descending
 ```
 
 
-# What you'll build
+## What you'll build
 
 For better understand let's take a real world usecase and implement that using Ballerina streaming features.
 
@@ -617,23 +617,23 @@ situation, you wanted to build an alert generation mechanism which send you an a
 -- Need a Diagram
 
 
-# Prerequisites
+## Prerequisites
  
 - JDK 1.8 or later
 - [Ballerina Distribution](https://github.com/ballerina-lang/ballerina/blob/master/docs/quick-tour.md)
 - A Text Editor or an IDE 
 
-## Optional requirements
+### Optional requirements
 - Ballerina IDE plugins ([IntelliJ IDEA](https://plugins.jetbrains.com/plugin/9520-ballerina), [VSCode](https://marketplace.visualstudio.com/items?itemName=WSO2.Ballerina), [Atom](https://atom.io/packages/language-ballerina))
 - [Docker](https://docs.docker.com/engine/installation/)
 
 
-# Developing queries
+## Developing queries
 
 > If you want to skip the basics, you can download the git repo and directly move to "Testing" section by skipping 
 "Developing" section.
 
-## Create the project structure
+### Create the project structure
 
 Ballerina is a complete programming language that can have any custom project structure that you wish. Although the 
 language allows you to have any package structure, use the following package structure for this project to follow 
@@ -666,7 +666,7 @@ Ballerina project initialized
 - Once you initialize your Ballerina project, you can change/add the names of the file to match with our guide project file 
 names.
 
-## Implement the streaming queries
+### Implement the streaming queries
 
 - Let's write streaming query as mentioned below. Forever statement contains the streaming queries that relevant for this
 usecase/scenario.
@@ -793,7 +793,7 @@ service<http:Service> order_mgt bind listener {
 
 - With that we've completed the development of the order_mgt_service and api_alert implementation. 
 
-## Customize the streaming queries to send email alerts
+### Customize the streaming queries to send email alerts
 
 In Above implementation, we simply generate a log to the stdout. An extended version of the above implementation would
 be, sending the alert as an email. Following shows you how to configure the gmail connector to send email as alerts.
@@ -844,13 +844,13 @@ match sendMessageResponse {
 }
 ```
 
-# Testing
+## Testing
 
 As mentioned in previous steps, we have to invoke above developed order management service to get the alert generated 
 from streaming queries. We have to send more than 10 requests from same host with in 10 seconds to get an alert generated.
 
 
-## Invoking the service
+### Invoking the service 
 
 You can run the service that you developed above, in your local environment. Open your terminal and navigate to 
 `<SAMPLE_ROOT_DIRECTORY>/streaming-service` and execute the following command.
@@ -879,11 +879,11 @@ Output :
 {"status":"Order Created.","orderId":"100500"} 
 ```
 
-# Deployment
+## Deployment
 
 Once you are done with the development, you can deploy the service using any of the methods that we listed below. 
 
-## Deploying locally
+### Deploying locally
 
 - As the first step you can build a Ballerina executable archive (.balx) of the service that we developed above, 
 using the following command. It points to the directory in which the service we developed above located and it will 
@@ -907,12 +907,12 @@ ballerina: deploying service(s) in 'target/api-alerting.balx'
 ballerina: started HTTP/WS server connector 0.0.0.0:9090
 ```
 
-## Deploying on Docker
+### Deploying on Docker
 
 You can run the service that we developed above as a docker container. As Ballerina platform offers native support for 
 running ballerina programs on containers, you just need to put the corresponding docker annotations on your service code. 
 
-## Deploying on Kubernetes
+### Deploying on Kubernetes
 
 - You can run the service that we developed above, on Kubernetes. The Ballerina language offers native support for 
 running a ballerina programs on Kubernetes, with the use of Kubernetes annotations that you can include as part of 
@@ -922,7 +922,7 @@ docker images prior to deploying it on Kubernetes.
 Refer [here](https://github.com/ballerina-guides/restful-service#deployment) for more deployment options.
 
 
-# Output
+## Output
 
 You will see a log line as shown below, when you invoke the service by satisfying one of the 
 criteria for alert.
