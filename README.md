@@ -349,7 +349,6 @@ are subscribed to those APIs as well.
 Here, we are focusing on below scenario where we have a order management service which allow to add order. At this 
 situation, you wanted to build an alert generation mechanism which send you an alert in below conditions. 
 
-- API/Service request from a black listed user IP
 - No of API/Service requests is greater than 10 in 10 seconds from same IP 
 
 -- Need a Diagram
@@ -585,8 +584,7 @@ match sendMessageResponse {
 ## Testing
 
 As mentioned in previous steps, we have to invoke above developed order management service to get the alert generated 
-from streaming queries. Either, we have to send more than 10 requests from same host with in 10 seconds or make a
-service request from a blacklisted host to get an alert generate.
+from streaming queries. We have to send more than 10 requests from same host with in 10 seconds to get an alert generated.
 
 
 ### Invoking the service 
