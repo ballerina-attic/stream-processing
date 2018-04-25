@@ -51,12 +51,12 @@ A object definition contains a unique name and a set of attributes with specific
 within the object. All the events that are selected to be received into a specific stream have the same schema 
 (i.e., have the same attributes in the same order). 
 
-**Purpose**
+###### Purpose
 
 By defining a schema it unifies common types of events together. This enables them to be processed via queries 
 using their defined attributes in a streaming manner.
 
-**Syntax**
+###### Syntax
 
 The syntax for defining a new stream is as follows.
 
@@ -79,7 +79,7 @@ The following parameters are configured in a stream definition.
 | `attribute type`   | The type of each attribute defined in the object.    |
 
 
-**Example**
+###### Example
 ```sql
 type Employee {
     string name;
@@ -99,11 +99,11 @@ The above creates a stream named `employeeStream` that constrained by `Employee`
 Stream processing and Complex Event Processing rules can be written in side the forever statement block. Multiple
 streaming queries can put together in a single Forever block.
 
-**Purpose**
+###### Purpose
 
 Each streaming query within forever block is an isolated processing unit that independent to each other.
 
-**Grammar**
+###### Grammar
 
 Multiple streaming queries can sit together inside a single Forever statement block. Please refer the grammar below.
 
@@ -121,7 +121,7 @@ streamingQueryStatement
     ;
 ```
 
-**Example**
+###### Example
 
 Query to filter out the teachers who are older than 30 years, wait until three teacher objects are collected by the
 stream, group the 10 teachers based on their marital status, and calculate the unique marital status count of the
@@ -144,12 +144,12 @@ teachers. Once the query is executed, publish the result to the `filteredStatusC
 Each streaming query can consume one or more streams, process the events in a streaming manner, and then generate an
  output.
 
-**Purpose**
+###### Purpose
 
 A query enables you to perform complex event processing and stream processing operations by processing incoming events 
 one by one in the order they arrive.
 
-**Syntax**
+###### Syntax
 
 All queries contain an input and an output section. Some also contain a projection section. A simple query with all 
 three sections is as follows.
@@ -163,7 +163,7 @@ select <attribute name>, <attribute name>, ...
 }
 ```
 
-**Example**
+###### Example
 
 This query consumes events from the `tempStream` stream (that is already defined) and outputs the room temperature and the room number to the `roomTempStream` stream.
 
@@ -356,11 +356,11 @@ Streaming queries supports the following for query projections.
 
 Filters are included in queries to filter information from input streams based on a specified condition.
 
-**Purpose**
+###### Purpose
 
 A filter allows you to separate events that match a specific condition as the output, or for further processing.
 
-**Syntax**
+###### Syntax
 
 Filter conditions should be defined with 'where' keyword next to the input stream name as shown below.
 
@@ -372,7 +372,7 @@ select <attribute name>, <attribute name>, ...
 }
 ```
 
-**Example**
+###### Example
 
 This query filters all server rooms of which the room number is within the range of 100-210, and having temperature greater than 40 degrees
 from the `tempStream` stream, and inserts the results into the `highTempStream` stream.
@@ -391,12 +391,12 @@ select roomNo, temp
 Windows allow you to capture a subset of events based on a specific criterion from an input stream for calculation.
 Each input stream can only have a maximum of one window.
 
-**Purpose**
+###### Purpose
 
 To create subsets of events within a stream based on time duration, number of events, etc for processing.
 A window can operate in a sliding or tumbling (batch) manner.
 
-**Syntax**
+###### Syntax
 
 The `window` prefix should be inserted next to the relevant stream in order to use a window.
 
@@ -409,7 +409,7 @@ select <attribute name>, <attribute name>, ...
 ```
 Note : Filter condition can be applied both before and/or after the window
 
-**Example**
+###### Example
 
 If you want to identify the maximum temperature out of the last 10 events, you need to define a `length` window of 10 events.
  This window operates in a sliding mode where the following 3 subsets are calculated when a list of 12 events are received in a sequential order.
@@ -474,7 +474,7 @@ Following are some inbuilt windows shipped with Ballerina Streams.
 Aggregate functions perform aggregate calculations in the query.
 When a window is defined the aggregation is restricted within that window. If no window is provided aggregation is performed from the start.
 
-**Syntax**
+###### Syntax
 
 ```sql
 from <input stream> window <window name>(<parameter>, <parameter>, ... )
@@ -489,7 +489,7 @@ select <aggregate function>(<parameter>, <parameter>, ... ) as <attribute name>,
 Aggregate parameters can be attributes, constant values, results of other functions or aggregates, results of mathematical or logical expressions, or time parameters.
 Aggregate parameters configured in a query  depends on the aggregate function being called.
 
-**Example**
+###### Example
 
 The following query calculates the average value for the `temp` attribute of the `tempStream` stream. This calculation is done for the last 10 minutes in a sliding manner, and the result is output as `avgTemp` to the `avgTempStream` output stream.
 
@@ -517,7 +517,7 @@ Following are some inbuilt aggregation functions shipped with Ballerina, for mor
 
 Group By allows you to group the aggregate based on specified attributes.
 
-**Syntax**
+###### Syntax
 
 The syntax for the Group By aggregate function is as follows:
 
@@ -530,7 +530,7 @@ group by <attribute1 name>, <attribute2 name> ...
 }
 ```
 
-**Example**
+###### Example
 
 The following query calculates the average temperature per `roomNo` and `deviceID` combination, for events that arrive at the `tempStream` stream
 for a sliding time window of 10 minutes.
@@ -548,11 +548,11 @@ group by roomNo, deviceID
 
 Having allows you to filter events after processing the `select` statement.
 
-**Purpose**
+###### Purpose
 
 This allows you to filter the aggregation output.
 
-**Syntax**
+###### Syntax
 
 The syntax for the Having clause is as follows:
 
@@ -566,7 +566,7 @@ having <condition>
 }
 ```
 
-**Example**
+###### Example
 
 The following query calculates the average temperature per room for the last 10 minutes, and alerts if it exceeds 30 degrees.
 ```sql
@@ -584,7 +584,7 @@ having avgTemp > 30
 Order By allows you to order the aggregated result in ascending and/or descending order based on specified attributes. By default ordering will be done in
 ascending manner. User can use 'descending' keyword to order in descending manner.
 
-**Syntax**
+###### Syntax
 
 The syntax for the Order By clause is as follows:
 
@@ -599,7 +599,7 @@ order by <attribute1 name> (ascending | descending)?, <attribute2 name> (<ascend
 }
 ```
 
-**Example**
+###### Example
 
 The following query calculates the average temperature per per `roomNo` and `deviceID` combination for every 10 minutes, and generate output events
 by ordering them in the ascending order of the room's avgTemp and then by the descending order of roomNo.
@@ -617,7 +617,7 @@ order by avgTemp, roomNo descending
 #### Join
 Joins allow you to get a combined result from two streams in real-time based on a specified condition.
 
-**Purpose**
+###### Purpose
 
 Streams are stateless. Therefore, in order to join two streams, they need to be connected to a window
 so that there is a pool of events that can be used for joining. Joins also accept conditions to join
@@ -627,7 +627,7 @@ During the joining process each incoming event of each stream is matched against
 stream's window based on the given condition, and the output events are generated for all the matching event pairs.
 
 
-**Syntax**
+###### Syntax
 
 The syntax for a join is as follows:
 
@@ -652,7 +652,7 @@ syntax in order to enable that stream to trigger the join operation. Here, event
 Note : The `unidirectional` keyword cannot be applied to both the input streams because the default
 behaviour already allows both streams to trigger the join operation.
 
-**Example**
+###### Example
 
 Assuming that the temperature of regulators are updated every minute.
 Following is a streaming query that controls the temperature regulators if they are not already `on`
@@ -685,7 +685,7 @@ Following are the supported operations of a join clause.
     Here, it returns all the events of left stream even if there are no matching events in the right
     stream by having null values for the attributes of the right stream.
 
-     **Example**
+     ###### Example
 
     The following query generates output events for all events from the `stockStream` stream
     regardless of whether a matching symbol exists in the `twitterStream` stream or not.
@@ -711,7 +711,7 @@ Following are the supported operations of a join clause.
     Here, output event are generated for each incoming event even if there are no matching events in
     the other stream.
 
-    **Example**
+    ###### Example
 
     The following query generates output events for all the incoming events of each stream regardless of whether there is a
     match for the `symbol` attribute in the other stream or not.
@@ -731,11 +731,11 @@ Following are the supported operations of a join clause.
 This is a state machine implementation that allows you to detect patterns in the events that arrive over time.
 This can correlate events within a single stream or between multiple streams.
 
-**Purpose**
+###### Purpose
 
 Patterns allow you to identify trends in events over a time period.
 
-**Syntax**
+###### Syntax
 
 The following is the syntax for a pattern query:
 
@@ -759,7 +759,7 @@ select <event reference>.<attribute name>, <event reference>.<attribute name>, .
 Ballerina Streams also supports pattern matching with counting events and matching events in a logical order such
 as (`&&`, `||`, and `!`). These are described in detail further below in this guide.
 
-**Example**
+###### Example
 
 This query sends an alert if the temperature of a room increases by 5 degrees within 10 min.
 
@@ -781,7 +781,7 @@ of the event e1, an output is generated via the `alertStream`.
 Counting patterns allow you to match multiple events that may have been received for the same matching condition.
 The number of events matched per condition can be limited via condition postfixes.
 
-**Syntax**
+###### Syntax
 
 Each matching condition can contain a collection of events with the minimum and maximum number of events to be matched as shown in the syntax below.
 
@@ -811,7 +811,7 @@ Square brackets can be used to indicate the event index where `1` can be used as
 + `e1[last]` refers to the last event.
 + `e1[last - 1]` refers to the event before the last event.
 
-**Example**
+###### Example
 
 The following streaming query calculates the temperature difference between two regulator events.
 
@@ -844,7 +844,7 @@ select e1.roomNo, e2[0].temp - e2[last].temp as tempDiff
 Logical patterns match events that arrive in temporal order and correlate them with logical relationships such as `&&`,
 `||` and `!`.
 
-**Syntax**
+###### Syntax
 
 ```sql
 from (every)? (!)? <event reference>=<input stream> where <filter condition>
@@ -867,7 +867,7 @@ Key Word|Description
 
 Here the `!` pattern can be followed by either an `&&` clause or the effective period of `!` can be concluded after a given `<time period>`. Further in Ballerina Streams more than two streams cannot be matched with logical conditions using `&&`, `||`, or `!` clauses at this point.
 
-**Example**
+###### Example
 
 Following streaming query, sends the `stop` control action to the regulator when the key is removed from the hotel room.
 ```sql
@@ -956,12 +956,12 @@ select e1.roomNo as roomNo
 
 Output rate limiting allows queries to output events periodically based on a specified condition.
 
-**Purpose**
+###### Purpose
 
 This allows you to limit the output to avoid overloading the subsequent executions, and to remove unnecessary
 information.
 
-**Syntax**
+###### Syntax
 
 The syntax of an output rate limiting configuration is as follows:
 
@@ -987,7 +987,7 @@ The possible values are as follows:
 * `last` : Only the last event processed by the query during the specified time interval/sliding window is emitted.
 * `all` : All the events processed by the query during the specified time interval/sliding window are emitted. **When no `<output event>` is defined, `all` is used by default.**
 
-**Examples**
+###### Examples
 
 + Returning events based on the number of events
 
