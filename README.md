@@ -20,6 +20,7 @@ The following are the sections available in this guide.
         * [Join](#join)
         * [Output Rate Limiting](#output-rate-limiting)
         * [Pattern](#pattern)
+        * [Sequence](#sequence)
 * [What you'll build](#what-youll-build)
 * [Prerequisites](#prerequisites)
 * [Developing queries](#developing-queries)
@@ -948,6 +949,154 @@ from e1=regulatorStateChangeStream where (action == 'start') followed by !tempSt
 select e1.roomNo as roomNo
 => (Alert [] alerts) {
     alertStream.publish(alerts);
+}
+```
+
+
+#### Sequence
+
+Sequence is a state machine implementation that allows you to detect the sequence of event occurrences over time.
+Here **all matching events need to arrive consecutively** to match the sequence condition, and there cannot be any non-matching events arriving within a matching sequence of events.
+This can correlate events within a single stream or between multiple streams.
+
+###### Purpose
+
+This allows you to detect a specified event sequence over a specified time period.
+
+###### Syntax
+
+The syntax for a sequence query is as follows:
+
+```sql
+from (every)? <event reference>=<input stream> where <filter condition> ,
+    <event reference>=<input stream where <filter condition> ,
+    ...
+    (within <time gap>)?
+select <event reference>.<attribute name>, <event reference>.<attribute name>, ...
+=> ( ) {
+
+}
+```
+
+| Items | Description |
+|-------------------|-------------|
+| `,` | This represents the immediate next event i.e., when an event that matches the first condition arrives, the event that arrives immediately after it should match the second condition. |
+| `<event reference>` | This allows you to add a reference to the the matching event so that it can be accessed later for further processing. |
+| `(within <time gap>)?` | The `within` clause is optional. It defines the time duration within which all the matching events should occur. |
+| `every` | `every` is an optional keyword. This defines whether the matching event should be triggered for every event that arrives at the specified stream with the matching condition. <br/> When this keyword is not used, the matching is carried out only once. |
+
+
+###### Example
+
+This query generates an alert if the increase in the temperature between two consecutive temperature events exceeds one degree.
+
+```sql
+from every e1=tempStream, e2=tempStream where (e1.temp + 1 < temp)
+select e1.temp as initialTemp, e2.temp as finalTemp
+=> (Alert [] alerts) {
+    alertStream.publish(alerts);
+}
+```
+
+##### Counting Sequence
+
+Counting sequences allow you to match multiple events for the same matching condition.
+The number of events matched per condition can be limited via condition postfixes such as **Counting Patterns**, or by using the
+`[0..]`, `[1..]`, and `[0..1]` operators.
+
+The matching events can also be retrieved using event indexes, similar to how it is done in **Counting Patterns**.
+
+###### Syntax
+
+Each matching condition in a sequence can contain a collection of events as shown below.
+
+```sql
+from (every)? <event reference>=<input stream> where <filter condition> ([0..]|[1..]|[0..1])?,
+    <event reference>=<input stream where <filter condition>([0..]|[1..]|[0..1])?,
+    ...
+    (within <time gap>)?
+select <event reference>.<attribute name>, <event reference>.<attribute name>, ...
+=> ( ) {
+
+}
+```
+
+|Postfix symbol|Required/Optional |Description|
+|---------|---------|---------|
+| `[1..]` | Optional |This matches **one or more** events to the given condition. |
+| `[0..]` | Optional |This matches **zero or more** events to the given condition. |
+| `[0..1]` | Optional |This matches **zero or one** events to the given condition. |
+
+
+###### Example
+
+This streaming query identifies temperature peeks.
+
+```sql
+
+type Temperature {
+    int deviceID,
+    int roomNo,
+    float temp
+};
+
+stream<Temperature> tempStream;
+
+from every e1=tempStream, e2=tempStream where (e1.temp <= temp)[1..], e3=tempStream where (e2[last].temp > temp)
+select e1.temp as initialTemp, e2[last].temp as peakTemp
+=>(PeekTemperature [] values) {
+    peekTempStream.publish(values);
+}
+```
+
+##### Logical Sequence
+
+Logical sequences identify logical relationships using `&&`, `||` and `!` on consecutively arriving events.
+
+###### Syntax
+The syntax for a logical sequence is as follows:
+
+```sql
+from (every)? (!)? <event reference>=<input stream> where <filter condition>
+          ((&& | ||) <event reference>=<input stream> where <filter condition>)? (within <time gap>)?,
+    ...
+select <event reference>([event index])?.<attribute name>, ...
+=> ( ) {
+
+}
+```
+
+Keywords such as `&&`, `||`, or `!` can be used to illustrate the logical relationship, similar to how it is done in **Logical Patterns**.
+
+###### Example
+
+This streaming query notifies the state when a regulator event is immediately followed by both temperature and humidity events.
+
+```sql
+
+type Temperature {
+    int deviceID,
+    float temp
+};
+
+type Humidity {
+    int deviceID,
+    float humid
+};
+
+type Regulator {
+    int deviceID,
+    boolean isOn
+};
+
+stream<Temperature> tempStream;
+stream<Humidity> humidStream;
+stream<Regulator> regulatorStream;
+
+from every e1=regulatorStream, e2=tempStream && e3=humidStream
+select e2.temp, e3.humid
+=> (Notification [] notifications) {
+    stateNotificationStream.publish(notifications);
 }
 ```
 
