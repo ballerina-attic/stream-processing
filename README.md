@@ -786,7 +786,7 @@ The number of events matched per condition can be limited via condition postfixe
 Each matching condition can contain a collection of events with the minimum and maximum number of events to be matched as shown in the syntax below.
 
 ```sql
-from (every)? <event reference>=<input stream> where <filter condition> ([<min count> .. <max count>])? ->
+from (every)? <event reference>=<input stream> where <filter condition> ([<min count> .. <max count>])? followed by
     ...
     (within <time gap>)?
 select <event reference>([event index])?.<attribute name>, ...
@@ -848,7 +848,7 @@ Logical patterns match events that arrive in temporal order and correlate them w
 
 ```sql
 from (every)? (!)? <event reference>=<input stream> where <filter condition>
-          ((&& | ||) <event reference>=<input stream> where <filter condition>)? (within <time gap>)? ->
+          ((&& | ||) <event reference>=<input stream> where <filter condition>)? (within <time gap>)? followed by
     ...
 select <event reference>([event index])?.<attribute name>, ...
 => ( ) {
