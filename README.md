@@ -19,6 +19,7 @@ The following are the sections available in this guide.
         * [Order By](#order-by)
         * [Join](#join)
         * [Output Rate Limiting](#output-rate-limiting)
+        * [Pattern](#pattern)
 * [What you'll build](#what-youll-build)
 * [Prerequisites](#prerequisites)
 * [Developing queries](#developing-queries)
@@ -654,7 +655,7 @@ behaviour already allows both streams to trigger the join operation.
 **Example**
 
 Assuming that the temperature of regulators are updated every minute.
-Following is a Siddhi App that controls the temperature regulators if they are not already `on`
+Following is a streaming query that controls the temperature regulators if they are not already `on`
 for all the rooms with a room temperature greater than 30 degrees.
 
 ```sql
@@ -723,6 +724,232 @@ Following are the supported operations of a join clause.
     => ( ) {
 
     }    </pre>
+
+
+#### Pattern
+
+This is a state machine implementation that allows you to detect patterns in the events that arrive over time.
+This can correlate events within a single stream or between multiple streams.
+
+**Purpose**
+
+Patterns allow you to identify trends in events over a time period.
+
+**Syntax**
+
+The following is the syntax for a pattern query:
+
+```sql
+from (every)? <event reference>=<input stream> where <filter condition> followed by
+    (every)? <event reference>=<input stream where <filter condition> followed by
+    ...
+    (within <time gap>)?
+select <event reference>.<attribute name>, <event reference>.<attribute name>, ...
+=> ( ) {
+
+}
+```
+| Items| Description |
+|-------------------|-------------|
+| `followed by` | This is used to indicate an event that should be following another event. The subsequent event does not necessarily have to occur immediately after the preceding event. The condition to be met by the preceding event should be added before the sign, and the condition to be met by the subsequent event should be added after the sign. |
+| `<event reference>` | This allows you to add a reference to the the matching event so that it can be accessed later for further processing. |
+| `(within <time gap>)?` | The `within` clause is optional. It defines the time duration within which all the matching events should occur. |
+| `every` | `every` is an optional keyword. This defines whether the event matching should be triggered for every event arrival in the specified stream with the matching condition. <br/> When this keyword is not used, the matching is carried out only once. |
+
+Ballerina Streams also supports pattern matching with counting events and matching events in a logical order such
+as (`&&`, `||`, and `!`). These are described in detail further below in this guide.
+
+**Example**
+
+This query sends an alert if the temperature of a room increases by 5 degrees within 10 min.
+
+```sql
+from every( e1 = tempStream ) followed by e2 = tempStream where (e1.roomNo == roomNo && (e1.temp + 5) <= temp)
+    within 10 minute
+select e1.roomNo, e1.temp as initialTemp, e2.temp as finalTemp
+=> (Alert [] alerts) {
+    alertStream.publish(alerts);
+}
+```
+
+Here, the matching process begins for each event in the `tempStream` stream (because `every` is used with `e1=tempStream`),
+and if  another event arrives within 10 minutes with a value for the `temp` attribute that is greater than or equal to `e1.temp + 5`
+of the event e1, an output is generated via the `alertStream`.
+
+##### Counting Pattern
+
+Counting patterns allow you to match multiple events that may have been received for the same matching condition.
+The number of events matched per condition can be limited via condition postfixes.
+
+**Syntax**
+
+Each matching condition can contain a collection of events with the minimum and maximum number of events to be matched as shown in the syntax below.
+
+```sql
+from (every)? <event reference>=<input stream> where <filter condition> ([<min count> .. <max count>])? ->
+    ...
+    (within <time gap>)?
+select <event reference>([event index])?.<attribute name>, ...
+=> ( ) {
+
+}
+```
+
+|Postfix|Description|Example
+---------|---------|---------
+|`[n1..n2]`|This matches `n1` to `n2` events (including `n1` and not more than `n2`).| `[1..4]` matches 1 to 4 events.
+|`[n..]`|This matches `n` or more events (including `n`).|`[2..]` matches 2 or more events.
+|`[..n]`|This matches up to `n` events (excluding `n`).|`[..5]` matches up to 5 events.
+|`[n]`|This matches exactly `n` events.|`[5]` matches exactly 5 events.
+
+Specific occurrences of the event in a collection can be retrieved by using an event index with its reference.
+Square brackets can be used to indicate the event index where `1` can be used as the index of the first event and `last` can be used as the index
+ for the `last` available event in the event collection. If you provide an index greater then the last event index,
+ the system returns `null`. The following are some valid examples.
+
++ `e1[3]` refers to the 3rd event.
++ `e1[last]` refers to the last event.
++ `e1[last - 1]` refers to the event before the last event.
+
+**Example**
+
+The following streaming query calculates the temperature difference between two regulator events.
+
+```sql
+type Temperature {
+    int deviceID,
+    int roomNo,
+    float temp
+};
+
+type Regulator {
+    int deviceID,
+    int roomNo,
+    float tempSet,
+    boolean isOn
+};
+
+stream<Temperature> tempStream;
+stream<Regulator> regulatorStream;
+
+from every( e1=regulatorStream) followed by e2=tempStream where (e1.roomNo==roomNo) [1..] followed by e3=regulatorStream where (e1.roomNo==roomNo)
+select e1.roomNo, e2[0].temp - e2[last].temp as tempDiff
+=> (TemperatureDiff [] values) {
+    tempDiffStream.publish(values);
+}
+```
+
+##### Logical Patterns
+
+Logical patterns match events that arrive in temporal order and correlate them with logical relationships such as `&&`,
+`||` and `!`.
+
+**Syntax**
+
+```sql
+from (every)? (!)? <event reference>=<input stream> where <filter condition>
+          ((&& | ||) <event reference>=<input stream> where <filter condition>)? (within <time gap>)? ->
+    ...
+select <event reference>([event index])?.<attribute name>, ...
+=> ( ) {
+
+}
+```
+
+Keywords such as `&&`, `||`, or `!` can be used to illustrate the logical relationship.
+
+Key Word|Description
+---------|---------
+`&&`|This allows both conditions of `&&` to be matched by two events in any order.
+`||`|The state succeeds if either condition of `||` is satisfied. Here the event reference of the other condition is `null`.
+`! <condition1> and <condition2>`| When `!` is included with `&&`, it identifies the events that match <condition2> arriving before any event that match <condition1>.
+`! <condition> for <time period>`| When `!` is included with `for`, it allows you to identify a situation where no event that matches `<condition1>` arrives during the specified `<time period>`.  e.g.,`from ! temperatureStream where (temp > 60) for 5 second`.
+
+Here the `!` pattern can be followed by either an `&&` clause or the effective period of `!` can be concluded after a given `<time period>`. Further in Ballerina Streams more than two streams cannot be matched with logical conditions using `&&`, `||`, or `!` clauses at this point.
+
+**Example**
+
+Following streaming query, sends the `stop` control action to the regulator when the key is removed from the hotel room.
+```sql
+
+type RegulatorState {
+    int deviceID,
+    int roomNo,
+    float tempSet,
+    string action
+};
+
+type RoomKey {
+    int deviceID,
+    int roomNo,
+    string action
+};
+
+stream<RegulatorState> regulatorStateChangeStream;
+stream<RoomKey> roomKeyStream;
+
+from every( e1=regulatorStateChangeStream where (action == 'on')) followed by
+      e2=roomKeyStream where (e1.roomNo == roomNo && action == 'removed') || e3=regulatorStateChangeStream where (e1.roomNo == roomNo && action == 'off')
+select e1.roomNo, e2 == null ? "none" : "stop" as action
+having action != 'none'
+=> (RegulatorAction [] output) {
+    regulatorActionStream.publish(output);
+}
+```
+
+This streaming query generates an alert if we have switch off the regulator before the temperature reaches 12 degrees.
+
+```sql
+
+type RegulatorState {
+    int deviceID,
+    int roomNo,
+    float tempSet,
+    string action
+};
+
+type Temperature {
+    int deviceID,
+    int roomNo,
+    float temp
+};
+
+stream<RegulatorState> regulatorStateChangeStream;
+stream<Temperature> tempStream;
+
+from e1=regulatorStateChangeStream where (action == 'start') followed by  !tempStream where (e1.roomNo == roomNo && temp < 12) && e2=regulatorStateChangeStream where (action == 'off')
+select e1.roomNo as roomNo
+=> (Alert [] alerts) {
+    alertStream.publish(alerts);
+}
+```
+
+This streaming query generates an alert if the temperature does not reduce to 12 degrees within 5 minutes of switching on the regulator.
+
+```sql
+
+type RegulatorState {
+    int deviceID,
+    int roomNo,
+    float tempSet,
+    string action
+};
+
+type Temperature {
+    int deviceID,
+    int roomNo,
+    float temp
+};
+
+stream<RegulatorState> regulatorStateChangeStream;
+stream<Temperature> tempStream;
+
+from e1=regulatorStateChangeStream where (action == 'start') followed by !tempStream where (e1.roomNo == roomNo && temp < 12) for '5 minute'
+select e1.roomNo as roomNo
+=> (Alert [] alerts) {
+    alertStream.publish(alerts);
+}
+```
 
 
 #### Output rate limiting
