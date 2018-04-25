@@ -18,6 +18,7 @@ The following are the sections available in this guide.
         * [Having](#having)
         * [Order By](#order-by)
         * [Join](#join)
+        * [Output Rate Limiting](#output-rate-limiting)
 * [What you'll build](#what-youll-build)
 * [Prerequisites](#prerequisites)
 * [Developing queries](#developing-queries)
@@ -720,6 +721,85 @@ Following are the supported operations of a join clause.
       on S.symbol== T.symbol
     select S.symbol as symbol, T.tweet, S.price
     => ( ) {
+
+    }    </pre>
+
+
+#### Output rate limiting
+
+Output rate limiting allows queries to output events periodically based on a specified condition.
+
+**Purpose**
+
+This allows you to limit the output to avoid overloading the subsequent executions, and to remove unnecessary
+information.
+
+**Syntax**
+
+The syntax of an output rate limiting configuration is as follows:
+
+```sql
+from <input stream> ...
+select <attribute name>, <attribute name>, ...
+output <rate limiting configuration>
+=> ( ) {
+
+}
+```
+Ballerina Streams supports three types of output rate limiting configurations as explained in the following table:
+
+Rate limiting configuration|Syntax| Description
+---------|---------|--------
+Based on time | `<output event> every <time interval>` | This outputs `<output event>` every `<time interval>` time interval.
+Based on number of events | `<output event> every <event interval> events` | This outputs `<output event>` for every `<event interval>` number of events.
+Snapshot based output | `snapshot every <time interval>`| This outputs all events in the window (or the last event if no window is defined in the query) for every given `<time interval>` time interval.
+
+Here the `<output event>` specifies the event(s) that should be returned as the output of the query.
+The possible values are as follows:
+* `first` : Only the first event processed by the query during the specified time interval/sliding window is emitted.
+* `last` : Only the last event processed by the query during the specified time interval/sliding window is emitted.
+* `all` : All the events processed by the query during the specified time interval/sliding window are emitted. **When no `<output event>` is defined, `all` is used by default.**
+
+**Examples**
+
++ Returning events based on the number of events
+
+    Here, events are emitted every time the specified number of events arrive. You can also specify whether to emit only the first event/last event, or all the events out of the events that arrived.
+
+    In this example, the last temperature per sensor is emitted for every 10 events.
+
+    <pre>
+    from tempStream
+    select temp, deviceID
+    group by deviceID
+    output last every 10 events
+    => (LowRateTemperature [] values) {
+
+    }    </pre>
+
++ Returning events based on time
+
+    Here events are emitted for every predefined time interval. You can also specify whether to emit only the first event, last event, or all events out of the events that arrived during the specified time interval.
+
+    In this example, emits all temperature events every 10 seconds
+
+    <pre>
+    from tempStream
+    output every 10 second
+    => (LowRateTemperature [] values) {
+
+    }    </pre>
+
++ Returning a periodic snapshot of events
+
+    This method works best with windows. If the input stream is not connected to a window, only the last current event for each predefined time interval is emitted.
+
+    This query emits a snapshot of the events in a time window of 5 seconds every 1 second.
+
+    <pre>
+    from tempStream window time(5000)
+    output snapshot every 1 second
+    => (SnapshotTemperature [] values) {
 
     }    </pre>
 
