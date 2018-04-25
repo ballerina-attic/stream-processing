@@ -736,7 +736,7 @@ situation, you wanted to build an alert generation mechanism which send you an a
 
 - No of API/Service requests is greater than 10 in 10 seconds from same IP 
 
--- Need a Diagram
+![Stream Processing](images/Streaming.svg "Stream Processing")
 
 
 ## Prerequisites
