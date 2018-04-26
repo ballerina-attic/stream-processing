@@ -1,10 +1,10 @@
 Ballerina Streaming Guide
 =========================
 
-This guide provides an understanding on Ballerina streaming capabilities and you will be learn on building a 
-comprehensive streaming usecase with Ballerina Streams.
+This guide provides an overview of the Ballerina streaming capabilities and demonstrates building a 
+comprehensive streaming usecase using Ballerina Streams.
 
-The following are the sections available in this guide.
+The following sections are available in this guide.
 
 * [Overview on Ballerina Streams](#overview)
 * [What you'll build](#what-youll-build)
@@ -16,10 +16,10 @@ The following are the sections available in this guide.
  
 ## Overview 
 
-Ballerina Streaming is designed to process event streams in a streaming manner, detect complex event occurrences, 
-and notify them in real-time.
+Ballerina streaming is designed to process event streams in a streaming manner, detect complex event occurrences, 
+and send notifications in real-time.
 
-Ballerina Streaming supports the following:
+Ballerina streaming supports the following:
  
 * Data preprocessing
 * Generating alerts based on thresholds
@@ -28,25 +28,26 @@ Ballerina Streaming supports the following:
 * Correlating data while finding missing and erroneous events
 * Detecting temporal event patterns
 * Tracking (something over space or time)
-* Analyzing trends (rise, fall, turn, tipple bottom)
-* And many more ...  
+* Analyzing trends (rise, fall, turn, triple bottom)
+* etc.   
 
-**Below are the top level concepts you have to understand on Ballerina Streams:**
+**The following topics are high level concepts about Ballerina streams**
 
 * [Stream](#stream)
 * [Forever Statement](#forever-statement)
 * [Query](#query)
 
 ### Stream
+
 A stream is a logical series of events ordered in time. Its schema is defined/constrained via the **record definition**.
 A record definition contains a unique name and a set of attributes with specific types and uniquely identifiable names
-within the record. All the events that are selected to be received into a specific stream have the same schema
+within the record. All the events that are selected to be input into a specific stream have the same schema
 (i.e., have the same attributes in the same order). 
 
 ###### Purpose
 
-By defining a schema it unifies common types of events together. This enables them to be processed via queries 
-using their defined attributes in a streaming manner.
+Defining a schema unifies common types of events together. This enables them to be processed via queries 
+using their defined attributes, in a streaming manner.
 
 ###### Syntax
 
@@ -66,9 +67,9 @@ The following parameters are configured in a stream definition.
 
 | Parameter     | Description |
 | ------------- |-------------|
-| `stream name`      | The name of the stream created. |
-| `attribute name`   | The schema of an record is defined by its attributes with uniquely identifiable attribute names.|
-| `attribute type`   | The type of each attribute defined in the record.    |
+| `stream name`      | The name of the created stream. |
+| `attribute name`   | The uniquely identifiable attribute name. The schema of a record is defined by its attributes.|
+| `attribute type`   | The type of each attribute defined in the record. |
 
 
 ###### Example
@@ -81,23 +82,22 @@ type Employee {
 
 stream<Employee> employeeStream;
 ```
-The above creates a stream named `employeeStream` that constrained by `Employee` type which contain below attributes.
+The SQL given above creates a stream named `employeeStream` that is constrained by the `Employee` type, which contains the following attributes.
 
 + `name` of type `string`
 + `age` of type `int` 
 + `status` of type `string` 
 
 ### Forever Statement
-Stream processing and Complex Event Processing rules can be written in side the forever statement block. Multiple
-streaming queries can put together in a single Forever block.
+The `forever` statement block can include stream processing and complex event processing rules. A single `forever` block can contain multiple streaming queries put together.
 
 ###### Purpose
 
-Each streaming query within forever block is an isolated processing unit that independent to each other.
+Each streaming query within the `forever` block is an isolated processing unit that is independent to other queries.
 
 ###### Grammar
 
-Multiple streaming queries can sit together inside a single Forever statement block. Please refer the grammar below.
+Multiple streaming queries can sit together inside a single `forever` statement block. See the grammar syntax given below.
 
 ```antlrv4
 foreverStatement
@@ -113,7 +113,7 @@ streamingQueryStatement
     ;
 ```
 
-###### Example
+###### Sample query
 
 Query to filter out the teachers who are older than 30 years, wait until three teacher records are collected by the
 stream, group the 10 teachers based on their marital status, and calculate the unique marital status count of the
@@ -134,7 +134,7 @@ teachers. Once the query is executed, publish the result to the `filteredStatusC
 ### Query
 
 Each streaming query can consume one or more streams, process the events in a streaming manner, and then generate an
- output.
+output.
 
 ###### Purpose
 
