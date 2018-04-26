@@ -18,9 +18,9 @@ The following are the sections available in this guide.
         * [Having](#having)
         * [Order By](#order-by)
         * [Join](#join)
-        * [Output Rate Limiting](#output-rate-limiting)
         * [Pattern](#pattern)
         * [Sequence](#sequence)
+        * [Output Rate Limiting](#output-rate-limiting)
 * [What you'll build](#what-youll-build)
 * [Prerequisites](#prerequisites)
 * [Developing queries](#developing-queries)
@@ -47,9 +47,9 @@ Ballerina Streaming supports the following:
 
 
 ### Stream
-A stream is a logical series of events ordered in time. Its schema is defined/constrained via the **object definition**.
-A object definition contains a unique name and a set of attributes with specific types and uniquely identifiable names 
-within the object. All the events that are selected to be received into a specific stream have the same schema 
+A stream is a logical series of events ordered in time. Its schema is defined/constrained via the **record definition**.
+A record definition contains a unique name and a set of attributes with specific types and uniquely identifiable names
+within the record. All the events that are selected to be received into a specific stream have the same schema
 (i.e., have the same attributes in the same order). 
 
 ###### Purpose
@@ -62,22 +62,22 @@ using their defined attributes in a streaming manner.
 The syntax for defining a new stream is as follows.
 
 ```sql
-type <object name>  {
+type <record name>  {
     <attribute type> <attribute name>;
     <attribute type> <attribute name>;
     <attribute type> <attribute name>;
     ...
 };
 
-stream<object name> <stream name>;
+stream<record name> <stream name>;
 ```
 The following parameters are configured in a stream definition.
 
 | Parameter     | Description |
 | ------------- |-------------|
 | `stream name`      | The name of the stream created. |
-| `attribute name`   | The schema of an object is defined by its attributes with uniquely identifiable attribute names.|  
-| `attribute type`   | The type of each attribute defined in the object.    |
+| `attribute name`   | The schema of an record is defined by its attributes with uniquely identifiable attribute names.|
+| `attribute type`   | The type of each attribute defined in the record.    |
 
 
 ###### Example
@@ -124,7 +124,7 @@ streamingQueryStatement
 
 ###### Example
 
-Query to filter out the teachers who are older than 30 years, wait until three teacher objects are collected by the
+Query to filter out the teachers who are older than 30 years, wait until three teacher records are collected by the
 stream, group the 10 teachers based on their marital status, and calculate the unique marital status count of the
 teachers. Once the query is executed, publish the result to the `filteredStatusCountStream` stream.
 
@@ -185,10 +185,8 @@ stream<temperature> tempStream;
 
 from tempStream 
 select roomNo, value
-=> (roomTemperature[] temperature) {
-
-      //Do whatever with the output event  
-      
+=> (roomTemperature[] temperatures) {
+    roomTempStream.publish(temperatures);
 }
 ```
 
@@ -326,29 +324,29 @@ Streaming queries supports the following for query projections.
                 </tr>
                 <tr>
                     <td>
-                        AND
+                        &&
                     </td>
                     <td>
                         Logical AND
                     </td>
                     <td>
-                        <pre>temp < 40 and (humidity < 40 or humidity >= 60)</pre>
+                        <pre>temp < 40 && (humidity < 40 or humidity >= 60)</pre>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        OR
+                        ||
                     </td>
                     <td>
                         Logical OR
                     </td>
                     <td>
-                        <pre>temp < 40 or (humidity < 40 and humidity >= 60)</pre>
+                        <pre>temp < 40 || (humidity < 40 && humidity >= 60)</pre>
                     </td>
                 </tr>
             </table>
             E.g., Converting Celsius to Fahrenheit and identifying rooms with room number between 10 and 15 as server rooms.
-            <pre>from tempStream<br>select roomNo, temp * 9/5 + 32 as temp, 'F' as scale, roomNo > 10 and roomNo < 15 as isServerRoom<br>=> (RoomFahrenheit [] events ) { <br/><br/>}</pre>
+            <pre>from tempStream<br>select roomNo, temp * 9/5 + 32 as temp, 'F' as scale, roomNo > 10 && roomNo < 15 as isServerRoom<br>=> (RoomFahrenheit [] events ) { <br/><br/>}</pre>
     </tr>
     
 </table>
@@ -379,7 +377,7 @@ This query filters all server rooms of which the room number is within the range
 from the `tempStream` stream, and inserts the results into the `highTempStream` stream.
 
 ```sql
-from tempStream where (roomNo >= 100 and roomNo < 210) and temp > 40
+from tempStream where (roomNo >= 100 && roomNo < 210) && temp > 40
 select roomNo, temp
 => (RoomTemperature [] value) {
     highTempStream.publish(values)
