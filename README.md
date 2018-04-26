@@ -19,7 +19,7 @@ The following sections are available in this guide.
 Ballerina streaming is designed to process event streams in a streaming manner, detect complex event occurrences, 
 and send notifications in real-time.
 
-Ballerina Streaming supports the following:
+Ballerina streaming supports the following:
  
 * Data preprocessing
 * Generating alerts based on thresholds
@@ -29,7 +29,7 @@ Ballerina Streaming supports the following:
 * Detecting temporal event patterns
 * Tracking (something over space or time)
 * Analyzing trends (rise, fall, turn, triple bottom)
-* And many more   
+* etc.   
 
 **The following topics are high level concepts about Ballerina streams**
 
@@ -38,6 +38,7 @@ Ballerina Streaming supports the following:
 * [Query](#query)
 
 ### Stream
+
 A stream is a logical series of events ordered in time. Its schema is defined/constrained via the **record definition**.
 A record definition contains a unique name and a set of attributes with specific types and uniquely identifiable names
 within the record. All the events that are selected to be input into a specific stream have the same schema
