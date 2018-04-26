@@ -1,7 +1,7 @@
 Ballerina Streaming Guide
 =========================
 
-This guide provides an overview of the Ballerina streaming capabilities and demonstrates building a 
+This guide provides an overview of the Ballerina streaming capabilities and demonstrates building a
 comprehensive streaming usecase using Ballerina Streams.
 
 The following sections are available in this guide.
@@ -16,7 +16,7 @@ The following sections are available in this guide.
  
 ## Overview 
 
-Ballerina streaming is designed to process event streams in a streaming manner, detect complex event occurrences, 
+Ballerina streaming is designed to process event streams in a streaming manner, detect complex event occurrences,
 and send notifications in real-time.
 
 Ballerina streaming supports the following:
@@ -29,7 +29,7 @@ Ballerina streaming supports the following:
 * Detecting temporal event patterns
 * Tracking (something over space or time)
 * Analyzing trends (rise, fall, turn, triple bottom)
-* etc.   
+* etc.
 
 **The following topics are high level concepts about Ballerina streams**
 
@@ -46,7 +46,7 @@ within the record. All the events that are selected to be input into a specific 
 
 ###### Purpose
 
-Defining a schema unifies common types of events together. This enables them to be processed via queries 
+Defining a schema unifies common types of events together. This enables them to be processed via queries
 using their defined attributes, in a streaming manner.
 
 ###### Syntax
@@ -812,9 +812,9 @@ Square brackets can be used to indicate the event index where `1` can be used as
  for the `last` available event in the event collection. If you provide an index greater then the last event index,
  the system returns `null`. The following are some valid examples.
 
-+ `e1[3]` refers to the 3rd event.
-+ `e1[last]` refers to the last event.
-+ `e1[last - 1]` refers to the event before the last event.
++ `e1[3]` refers to the 4rd event.
++ `e1[e1.length - 1]` refers to the last event.
++ `e1[e1.length - 2]` refers to the event before the last event.
 
 ###### Example
 
@@ -1046,8 +1046,8 @@ type Temperature {
 
 stream<Temperature> tempStream;
 
-from every e1=tempStream, e2=tempStream where (e1.temp <= temp)[1..], e3=tempStream where (e2[last].temp > temp)
-select e1.temp as initialTemp, e2[last].temp as peakTemp
+from every e1=tempStream, e2=tempStream where (e1.temp <= temp)[1..], e3=tempStream where (e2[e2.length-1].temp > temp)
+select e1.temp as initialTemp, e2[e2.length-1].temp as peakTemp
 =>(PeekTemperature [] values) {
     peekTempStream.publish(values);
 }
