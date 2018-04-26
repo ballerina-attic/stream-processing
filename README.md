@@ -7,20 +7,6 @@ comprehensive streaming usecase with Ballerina Streams.
 The following are the sections available in this guide.
 
 * [Overview on Ballerina Streams](#overview)
-    * [Stream](#stream)
-    * [Forever Statement](#forever-statement)
-    * [Query](#query)
-        * [Query Projection](#query-projection)
-        * [Filter](#filter)
-        * [Window](#window)
-        * [Aggregation Function](#aggregate-function)
-        * [Group By](#group-by)
-        * [Having](#having)
-        * [Order By](#order-by)
-        * [Join](#join)
-        * [Pattern](#pattern)
-        * [Sequence](#sequence)
-        * [Output Rate Limiting](#output-rate-limiting)
 * [What you'll build](#what-youll-build)
 * [Prerequisites](#prerequisites)
 * [Developing queries](#developing-queries)
@@ -45,6 +31,11 @@ Ballerina Streaming supports the following:
 * Analyzing trends (rise, fall, turn, tipple bottom)
 * And many more ...  
 
+Below are the top level concepts you have to understand on Ballerina Streams:
+
+* [Stream](#stream)
+* [Forever Statement](#forever-statement)
+* [Query](#query)
 
 ### Stream
 A stream is a logical series of events ordered in time. Its schema is defined/constrained via the **record definition**.
@@ -189,6 +180,21 @@ select roomNo, value
     roomTempStream.publish(temperatures);
 }
 ```
+
+
+**Please refer below subsection to undersatnd better about streaming queries:**
+
+* [Query Projection](#query-projection)
+* [Filter](#filter)
+* [Window](#window)
+* [Aggregation Function](#aggregate-function)
+* [Group By](#group-by)
+* [Having](#having)
+* [Order By](#order-by)
+* [Join](#join)
+* [Pattern](#pattern)
+* [Sequence](#sequence)
+* [Output Rate Limiting](#output-rate-limiting)
 
 
 #### Query Projection
