@@ -31,7 +31,7 @@ Ballerina Streaming supports the following:
 * Analyzing trends (rise, fall, turn, tipple bottom)
 * And many more ...  
 
-Below are the top level concepts you have to understand on Ballerina Streams:
+**Below are the top level concepts you have to understand on Ballerina Streams:**
 
 * [Stream](#stream)
 * [Forever Statement](#forever-statement)
