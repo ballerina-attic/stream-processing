@@ -88,12 +88,12 @@ The above creates a stream named `employeeStream` that constrained by `Employee`
 + `status` of type `string` 
 
 ### Forever Statement
-Stream processing and Complex Event Processing rules can be written in side the forever statement block. Multiple
+Stream processing and Complex Event Processing rules can be written inside the forever statement block. Multiple
 streaming queries can put together in a single Forever block.
 
 ###### Purpose
 
-Each streaming query within forever block is an isolated processing unit that independent to each other.
+Each streaming query within forever block is an isolated processing unit that is independent to each other.
 
 ###### Grammar
 
@@ -812,9 +812,9 @@ Square brackets can be used to indicate the event index where `1` can be used as
  for the `last` available event in the event collection. If you provide an index greater then the last event index,
  the system returns `null`. The following are some valid examples.
 
-+ `e1[3]` refers to the 3rd event.
-+ `e1[last]` refers to the last event.
-+ `e1[last - 1]` refers to the event before the last event.
++ `e1[3]` refers to the 4rd event.
++ `e1[e1.length - 1]` refers to the last event.
++ `e1[e1.length - 2]` refers to the event before the last event.
 
 ###### Example
 
@@ -1046,8 +1046,8 @@ type Temperature {
 
 stream<Temperature> tempStream;
 
-from every e1=tempStream, e2=tempStream where (e1.temp <= temp)[1..], e3=tempStream where (e2[last].temp > temp)
-select e1.temp as initialTemp, e2[last].temp as peakTemp
+from every e1=tempStream, e2=tempStream where (e1.temp <= temp)[1..], e3=tempStream where (e2[e2.length-1].temp > temp)
+select e1.temp as initialTemp, e2[e2.length-1].temp as peakTemp
 =>(PeekTemperature [] values) {
     peekTempStream.publish(values);
 }
