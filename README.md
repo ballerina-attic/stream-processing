@@ -276,7 +276,9 @@ NOTE: You need to have the Ballerina installed in you local machine to run the B
 
 You can test the functionality of the order management service by sending more than ten
 HTTP request within 10 seconds to 'order' operation.
-For example, we have used the curl commands to test each operation of OrderMgtService as follows. 
+For example, we have used the following curl command to test "order" operation as follows.
+For an alert to be generated, the "order" operation should be invoked more than
+10 times within 10 seconds from the same host.
 
 **Create Order** 
 ```
