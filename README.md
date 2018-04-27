@@ -82,7 +82,7 @@ type Employee {
 
 stream<Employee> employeeStream;
 ```
-The SQL given above creates a stream named `employeeStream` that is constrained by the `Employee` type, which contains the following attributes.
+The SQL given above creates a stream named `employeeStream` that is constrained by the `Employee` type, and contains the following attributes.
 
 + `name` of type `string`
 + `age` of type `int` 
@@ -97,7 +97,7 @@ Each streaming query within the `forever` block is an isolated processing unit t
 
 ###### Grammar
 
-Multiple streaming queries can sit together inside a single `forever` statement block. See the grammar syntax given below.
+Multiple streaming queries can sit together inside a single `forever` statement block as shown in the syntax given below.
 
 ```antlrv4
 foreverStatement
@@ -115,9 +115,9 @@ streamingQueryStatement
 
 ###### Sample query
 
-Query to filter out the teachers who are older than 30 years, wait until three teacher records are collected by the
-stream, group the 10 teachers based on their marital status, and calculate the unique marital status count of the
-teachers. Once the query is executed, publish the result to the `filteredStatusCountStream` stream.
+This query filters out the teachers who are older than 30 years. It waits until three teacher records are collected by the
+stream. Ten teachers are grouped based on their marital status, an the unique marital status count of the
+teachers is counted. Once the query is executed, its result is published to the `filteredStatusCountStream` stream.
 
 ```sql
     forever {
@@ -133,8 +133,7 @@ teachers. Once the query is executed, publish the result to the `filteredStatusC
 
 ### Query
 
-Each streaming query can consume one or more streams, process the events in a streaming manner, and then generate an
-output.
+Each streaming query can consume one or more streams, process the events in a streaming manner, and then generate an output.
 
 ###### Purpose
 
@@ -143,9 +142,7 @@ one by one in the order they arrive.
 
 ###### Syntax
 
-All queries contain an input and an output section. Some also contain a projection section. A simple query with all 
-three sections is as follows.
-
+Each query contains an input and an output section. Some also contain a projection section. The following is a simple query with all three sections.
 ```sql
 from <input stream> 
 select <attribute name>, <attribute name>, ...
@@ -182,7 +179,7 @@ select roomNo, value
 ```
 
 
-**Please refer below subsection to undersatnd better about streaming queries:**
+**For more information about streaming queries, see the following subsections:**
 
 * [Query Projection](#query-projection)
 * [Filter](#filter)
@@ -199,7 +196,7 @@ select roomNo, value
 
 #### Query Projection
 
-Streaming queries supports the following for query projections.
+Streaming queries support the following for query projections.
 
 <table style="width:100%">
     <tr>
@@ -210,15 +207,15 @@ Streaming queries supports the following for query projections.
         <td>Selecting required objects for projection</td>
         <td>This involves selecting only some of the attributes from the input stream to be inserted into an output stream.
             <br><br>
-            E.g., The following query selects only the `roomNo` and `temp` attributes from the `tempStream` stream.
+            e.g., The following query selects only the `roomNo` and `temp` attributes from the `tempStream` stream.
             <pre style="align:left">from tempStream<br>select roomNo, temp<br>=> ( ) { <br/><br/>}</pre>
         </td>
     </tr>
     <tr>
         <td>Selecting all attributes for projection</td>
-        <td>Selecting all the attributes in an input stream to be inserted into an output stream. This can be done by using asterisk ( * ) or by omitting the `select` statement.
+        <td>This involves selecting all the attributes in an input stream to be inserted into an output stream. This can be done by using an asterisk ( * ) or by omitting the `select` statement.
             <br><br>
-            E.g., Both the following queries select all the attributes in the `tempStream` stream.
+            e.g., Both the following queries select all the attributes in the `tempStream` stream.
             <pre>from tempStream<br>select *<br>=> ( ) { <br/><br/>}</pre>
             or
             <pre>from tempStream<br>=> ( ) { <br/><br/>}</pre>
@@ -228,7 +225,7 @@ Streaming queries supports the following for query projections.
         <td>Renaming attributes</td>
         <td>This selects attributes from the input streams and inserts them into the output stream with different names.
             <br><br>
-            E.g., This query renames `roomNo` to `roomNumber` and `temp` to `temperature`.
+            e.g., This query renames `roomNo` to `roomNumber` and `temp` to `temperature`.
             <pre>from tempStream <br>select roomNo as roomNumber, temp as temperature<br>=> ( ) { <br/><br/>}</pre>
         </td>
     </tr>
@@ -236,7 +233,7 @@ Streaming queries supports the following for query projections.
         <td>Introducing the constant value</td>
         <td>This adds constant values by assigning it to an attribute using `as`.
             <br></br>
-            E.g., This query specifies 'C' to be used as the constant value for `scale` attribute. 
+            e.g., This query specifies 'C' to be used as the constant value for the `scale` attribute. 
             <pre>from tempStream<br>select roomNo, temp, 'C' as scale<br>=> ( ) { <br/><br/>}</pre>
         </td>
     </tr>
@@ -351,7 +348,7 @@ Streaming queries supports the following for query projections.
                     </td>
                 </tr>
             </table>
-            E.g., Converting Celsius to Fahrenheit and identifying rooms with room number between 10 and 15 as server rooms.
+            e.g., This query converts Celsius to Fahrenheit, and identifies rooms of which the room number is between 10 and 15 as server rooms.
             <pre>from tempStream<br>select roomNo, temp * 9/5 + 32 as temp, 'F' as scale, roomNo > 10 && roomNo < 15 as isServerRoom<br>=> (RoomFahrenheit [] events ) { <br/><br/>}</pre>
     </tr>
     
@@ -363,11 +360,11 @@ Filters are included in queries to filter information from input streams based o
 
 ###### Purpose
 
-A filter allows you to separate events that match a specific condition as the output, or for further processing.
+A filter allows you to separate events that match a specific condition as the output or for further processing.
 
 ###### Syntax
 
-Filter conditions should be defined with 'where' keyword next to the input stream name as shown below.
+Filter conditions should be defined with the `where` keyword next to the input stream name as shown below.
 
 ```sql
 from <input stream> where <filter condition>
@@ -379,7 +376,7 @@ select <attribute name>, <attribute name>, ...
 
 ###### Example
 
-This query filters all server rooms of which the room number is within the range of 100-210, and having temperature greater than 40 degrees
+This query filters all the server rooms of which the room number is within the range of 100-210, and that have temperature greater than 40 degrees
 from the `tempStream` stream, and inserts the results into the `highTempStream` stream.
 
 ```sql
