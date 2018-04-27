@@ -44,7 +44,7 @@ Before you begin, make sure that the following applications are installed:
 
 ## Developing queries
 
-> If you want to skip the basics, you can download the git repository and directly move to the**Testing**section without following the**Developing**section.
+> If you want to skip the basics, you can download the git repository and directly move to the [Testing](#testing) section without following the [Developing queries](#developing-queries) section.
 
 ### Create the project structure
 
