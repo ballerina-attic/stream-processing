@@ -115,9 +115,9 @@ streamingQueryStatement
 
 ###### Example
 
-Query to filter out the teachers who are older than 30 years, wait until three teacher records are collected by the
-stream, group the 10 teachers based on their marital status, and calculate the unique marital status count of the
-teachers. Once the query is executed, publish the result to the `filteredStatusCountStream` stream.
+This query filters out the teachers who are older than 30 years. It waits until three teacher records are collected by the
+stream. Ten teachers are grouped based on their marital status, an the unique marital status count of the
+teachers is counted. Once the query is executed, its result is published to the `filteredStatusCountStream` stream.
 
 ```sql
     forever {
@@ -133,8 +133,7 @@ teachers. Once the query is executed, publish the result to the `filteredStatusC
 
 ### Query
 
-Each streaming query can consume one or more streams, process the events in a streaming manner, and then generate an
- output.
+Each streaming query can consume one or more streams, process the events in a streaming manner, and then generate an output.
 
 ###### Purpose
 
@@ -143,9 +142,7 @@ one by one in the order they arrive.
 
 ###### Syntax
 
-All queries contain an input and an output section. Some also contain a projection section. A simple query with all 
-three sections is as follows.
-
+Each query contains an input and an output section. Some also contain a projection section. The following is a simple query with all three sections.
 ```sql
 from <input stream> 
 select <attribute name>, <attribute name>, ...
@@ -182,7 +179,7 @@ select roomNo, value
 ```
 
 
-**Please refer below subsection to undersatnd better about streaming queries:**
+**For more information about streaming queries, see the following subsections:**
 
 * [Query Projection](#query-projection)
 * [Filter](#filter)
@@ -199,7 +196,7 @@ select roomNo, value
 
 #### Query Projection
 
-Streaming queries supports the following for query projections.
+Streaming queries support the following for query projections.
 
 <table style="width:100%">
     <tr>
@@ -210,15 +207,15 @@ Streaming queries supports the following for query projections.
         <td>Selecting required objects for projection</td>
         <td>This involves selecting only some of the attributes from the input stream to be inserted into an output stream.
             <br><br>
-            E.g., The following query selects only the `roomNo` and `temp` attributes from the `tempStream` stream.
+            e.g., The following query selects only the `roomNo` and `temp` attributes from the `tempStream` stream.
             <pre style="align:left">from tempStream<br>select roomNo, temp<br>=> ( ) { <br/><br/>}</pre>
         </td>
     </tr>
     <tr>
         <td>Selecting all attributes for projection</td>
-        <td>Selecting all the attributes in an input stream to be inserted into an output stream. This can be done by using asterisk ( * ) or by omitting the `select` statement.
+        <td>This involves selecting all the attributes in an input stream to be inserted into an output stream. This can be done by using an asterisk ( * ) or by omitting the `select` statement.
             <br><br>
-            E.g., Both the following queries select all the attributes in the `tempStream` stream.
+            e.g., Both the following queries select all the attributes in the `tempStream` stream.
             <pre>from tempStream<br>select *<br>=> ( ) { <br/><br/>}</pre>
             or
             <pre>from tempStream<br>=> ( ) { <br/><br/>}</pre>
@@ -228,7 +225,7 @@ Streaming queries supports the following for query projections.
         <td>Renaming attributes</td>
         <td>This selects attributes from the input streams and inserts them into the output stream with different names.
             <br><br>
-            E.g., This query renames `roomNo` to `roomNumber` and `temp` to `temperature`.
+            e.g., This query renames `roomNo` to `roomNumber` and `temp` to `temperature`.
             <pre>from tempStream <br>select roomNo as roomNumber, temp as temperature<br>=> ( ) { <br/><br/>}</pre>
         </td>
     </tr>
