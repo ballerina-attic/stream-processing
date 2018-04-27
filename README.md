@@ -274,8 +274,11 @@ $ballerina run api-alerting
 ```
 NOTE: You need to have the Ballerina installed in you local machine to run the Ballerina service.  
 
-You can test the functionality of the order management service by sending HTTP request to 'order' operation. 
-For example, we have used the curl commands to test each operation of OrderMgtService as follows. 
+You can test the functionality of the order management service by sending more than ten
+HTTP request within 10 seconds to 'order' operation.
+For example, we have used the following curl command to test "order" operation as follows.
+For an alert to be generated, the "order" operation should be invoked more than
+10 times within 10 seconds from the same host.
 
 **Create Order** 
 ```
@@ -292,6 +295,24 @@ Output :
 
 {"status":"Order Created.","orderId":"100500"} 
 ```
+
+### Writing unit tests
+
+In Ballerina, the unit test cases should be in the same package inside a folder named as 'tests'.  When writing the test functions the below convention should be followed.
+- Test functions should be annotated with `@test:Config`. See the below example.
+```ballerina
+   @test:Config
+   function testOrderAlerts() {
+```
+
+This guide contains  an unit test case for alert generation available in the 'order_mgt_service' implemented above.
+
+To run the unit tests, open your terminal and navigate to `<SAMPLE_ROOT_DIRECTORY>/streaming-service`, and run the following command.
+```bash
+$ ballerina test
+```
+
+To check the implementation of the test file, refer to the [order_mgt_service_test.bal](https://github.com/ballerina-guides/stream-processing/blob/master/streaming-service/api-alerting/tests/order_mgt_service_test.bal).
 
 ## Deployment
 
