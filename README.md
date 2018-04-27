@@ -395,12 +395,12 @@ Each input stream can only have a maximum of one window.
 
 ###### Purpose
 
-To create subsets of events within a stream based on time duration, number of events, etc for processing.
+To create subsets of events within a stream based on the time duration, number of events, etc for processing.
 A window can operate in a sliding or tumbling (batch) manner.
 
 ###### Syntax
 
-The `window` prefix should be inserted next to the relevant stream in order to use a window.
+In order to use a window, the `window` prefix should be inserted next to the relevant stream.
 
 ```sql
 from <input stream> window <window name>(<parameter>, <parameter>, ... )
@@ -409,7 +409,7 @@ select <attribute name>, <attribute name>, ...
 
 }
 ```
-Note : Filter condition can be applied both before and/or after the window
+Note : The filter condition can be applied both before and/or after the window
 
 ###### Example
 
@@ -474,7 +474,7 @@ Following are some inbuilt windows shipped with Ballerina Streams.
 #### Aggregate function
 
 Aggregate functions perform aggregate calculations in the query.
-When a window is defined the aggregation is restricted within that window. If no window is provided aggregation is performed from the start.
+When a window is defined the aggregation is restricted within that window. If no window is provided, aggregation is performed from the start.
 
 ###### Syntax
 
@@ -489,7 +489,7 @@ select <aggregate function>(<parameter>, <parameter>, ... ) as <attribute name>,
 **Aggregate Parameters**
 
 Aggregate parameters can be attributes, constant values, results of other functions or aggregates, results of mathematical or logical expressions, or time parameters.
-Aggregate parameters configured in a query  depends on the aggregate function being called.
+Aggregate parameters configured in a query depends on the aggregate function being called.
 
 ###### Example
 
