@@ -171,27 +171,6 @@ service<http:Service> orderMgt bind listener {
 
     future ftr = start initRealtimeRequestCounter();
 
-    // Resource that handles the HTTP GET requests that are directed to a specific
-    // order using path '/orders/<orderID>
-    @http:ResourceConfig {
-        methods: ["GET"],
-        path: "/order/{orderId}"
-    }
-    findOrder(endpoint client, http:Request req, string orderId) {
-        // Find the requested order from the map and retrieve it in JSON format.
-        json? payload = ordersMap[orderId];
-        http:Response response;
-        if (payload == null) {
-            payload = "Order : " + orderId + " cannot be found.";
-        }
-
-        // Set the JSON payload in the outgoing response message.
-        response.setJsonPayload(payload);
-
-        // Send response to the client.
-        _ = client->respond(response);
-    }
-
     // Resource that handles the HTTP POST requests that are directed to the path
     // '/orders' to create a new Order.
     @http:ResourceConfig {
@@ -218,53 +197,6 @@ service<http:Service> orderMgt bind listener {
         // This can be used by the client to locate the newly added order.
         response.setHeader("Location", "http://localhost:9090/ordermgt/order/" +
                 orderId);
-
-        // Send response to the client.
-        _ = client->respond(response);
-    }
-
-    // Resource that handles the HTTP PUT requests that are directed to the path
-    // '/orders' to update an existing Order.
-    @http:ResourceConfig {
-        methods: ["PUT"],
-        path: "/order/{orderId}"
-    }
-    updateOrder(endpoint client, http:Request req, string orderId) {
-        json updatedOrder = check req.getJsonPayload();
-
-        // Find the order that needs to be updated and retrieve it in JSON format.
-        json existingOrder = ordersMap[orderId];
-
-        // Updating existing order with the attributes of the updated order.
-        if (existingOrder != null) {
-            existingOrder.Order.Name = updatedOrder.Order.Name;
-            existingOrder.Order.Description = updatedOrder.Order.Description;
-            ordersMap[orderId] = existingOrder;
-        } else {
-            existingOrder = "Order : " + orderId + " cannot be found.";
-        }
-
-        http:Response response;
-        // Set the JSON payload to the outgoing response message to the client.
-        response.setJsonPayload(existingOrder);
-        // Send response to the client.
-        _ = client->respond(response);
-    }
-
-    // Resource that handles the HTTP DELETE requests, which are directed to the path
-    // '/orders/<orderId>' to delete an existing Order.
-    @http:ResourceConfig {
-        methods: ["DELETE"],
-        path: "/order/{orderId}"
-    }
-    cancelOrder(endpoint client, http:Request req, string orderId) {
-        http:Response response;
-        // Remove the requested order from the map.
-        _ = ordersMap.remove(orderId);
-
-        json payload = "Order : " + orderId + " removed.";
-        // Set a generated payload with order status.
-        response.setJsonPayload(payload);
 
         // Send response to the client.
         _ = client->respond(response);
