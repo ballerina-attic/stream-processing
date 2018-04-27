@@ -4,7 +4,7 @@ Ballerina Streaming
 Ballerina streaming is designed to process event streams in a streaming manner, detect complex event occurrences,
 and send notifications in real-time.
 
->This guide provides an overview of the Ballerina streaming capabilities and demonstrates building a
+>This guide provides an overview of the streaming capabilities of Ballerina and demonstrates how to build a
 comprehensive streaming usecase using Ballerina Streams.
 
 The following sections are available in this guide.
@@ -19,20 +19,19 @@ The following sections are available in this guide.
 
 ## What you'll build
 
-For better understand let's take a real world usecase and implement that using Ballerina streaming features.
+To understand Ballerina streaming better, let's take a real world usecase and implement that using Ballerina streaming features.
 
-Let's assume, that you are a API developer and you have published few APIs to the API store. There are subscribers who
-are subscribed to those APIs as well. 
+Let's assume, that you are a API developer and you have published a few APIs to the API store. There are also subscribers who
+have subscribed to these APIs. 
 
-Here, we are focusing on below scenario where we have a order management service which allow to add order. At this 
-situation, you wanted to build an alert generation mechanism which send you an alert in below conditions. 
-
-- No of API/Service requests is greater than 10 in 10 seconds from same IP 
+In this scenario, an order management system allows you to add orders. You also need to build an alert generation 
+mechanism that sends you an alert if the number of API/service requests from an API exceeds ten within a time period of ten seconds.
 
 ![Stream Processing](images/Streaming.svg "Stream Processing")
 
-
 ## Prerequisites
+
+Before you begin, make sure that the following applications are installed:
  
 - JDK 1.8 or later
 - [Ballerina Distribution](https://github.com/ballerina-lang/ballerina/blob/master/docs/quick-tour.md)
@@ -45,13 +44,11 @@ situation, you wanted to build an alert generation mechanism which send you an a
 
 ## Developing queries
 
-> If you want to skip the basics, you can download the git repo and directly move to "Testing" section by skipping 
-"Developing" section.
+> If you want to skip the basics, you can download the git repository and directly move to the**Testing**section without following the**Developing**section.
 
 ### Create the project structure
 
-Ballerina is a complete programming language that can have any custom project structure that you wish. Although the 
-language allows you to have any package structure, use the following package structure for this project to follow 
+Ballerina is a complete programming language that supports any custom project structure. In this scenario, let's use the following package structure for this project to follow 
 this guide.
 
 ```
@@ -62,10 +59,10 @@ streaming-service
       └── test
           └── order_mgt_service_test.bal          
 ```
-You can create the above Ballerina project using Ballerina project initializing toolkit.
+You can create the above Ballerina project via the Ballerina project initializing toolkit.
 
-- First, create a new directory in your local machine as `streaming-service` and navigate to the directory using terminal. 
-- Then enter the following inputs to the Ballerina project initializing toolkit.
+- First, create a new directory named `streaming-service` in your local machine. Then navigate to this directory in the terminal. 
+- Enter the following inputs to the Ballerina project initializing toolkit.
 ```bash
 streaming-service$ ballerina init -i
 Create Ballerina.toml [yes/y, no/n]: (y) y
@@ -78,12 +75,12 @@ Ballerina source [service/s, main/m, finish/f]: (f) f
 Ballerina project initialized
 ```
 
-- Once you initialize your Ballerina project, you can change/add the names of the file to match with our guide project file 
+- Once you initialize your Ballerina project, you can change/add the names of the file to match our guide project file 
 names.
 
 ### Implement the streaming queries
 
-- Let's write streaming query as mentioned below. Forever statement contains the streaming queries that relevant for this
+- Let's write streaming query as mentioned below. The forever statement contains the streaming queries that are relevant for this
 usecase/scenario.
 
 ##### api_alert.bal
@@ -135,16 +132,16 @@ function printRequestCount (RequestCount reqCount) {
 
 ```
 
-- We can get started with a Ballerina service; 'order_mgt_service', which is the RESTful service that serves the order 
-management request. order_mgt_service can have multiple resources and each resource is dedicated for a specific order 
+- Let's get started with a Ballerina service named `order_mgt_service`, which is the RESTful service that serves the order 
+management request. `order_mgt_service` can have multiple resources. Each resource is dedicated for a specific order 
 management functionality. 
 
-- You can add the content to your Ballerina service as shown below. In that code segment you can find the implementation 
-of the service 'order_mgt_service'.
+- You can add the content to your Ballerina service as shown below. In that code segment, you can find the implementation 
+of the `order_mgt_service` service.
  
-For each order management operation, there is a dedicated resource and inside each resource we can implement the 
-order management operation logic. Here we are using the order_mgt_service.bal file that used in restful-service guide 
-to explain how streaming queries can be used with some modification which calls a function to send an event to the 
+For each order management operation, there is a dedicated resource. Inside each resource, you can implement the 
+order management operation logic. Here, the `order_mgt_service.bal` file that is used in the restful-service guide 
+explains how streaming queries can be used with a modification that calls a function to send an event to the 
 stream.
 
 ##### order_mgt_service.bal
@@ -209,13 +206,13 @@ service<http:Service> orderMgt bind listener {
 
 ### Customize the streaming queries to send email alerts
 
-In Above implementation, we simply generate a log to the stdout. An extended version of the above implementation would
-be, sending the alert as an email. Following shows you how to configure the gmail connector to send email as alerts.
+In the above implementation, you generate a log to the stdout. An extended version of the above implementation sends 
+the alert as an email. The following demonstrates how to configure the gmail connector to send email as alerts.
 
-- Add following code fragment to api_alert.bal as a global variable (in the same scope the ClientRequest and RequestCount types are defined).
-For more information on how ballerina gmail connector is configured, please refer [here](https://github.com/wso2-ballerina/package-gmail/blob/master/Readme.md)
-You have to replace "access-token", "client-id", "client-secret", "refresh-token" with your OAuth credentials.
-For more information on Google OAuth 2.0 applications, please refer [here](https://developers.google.com/identity/protocols/OAuth2)
+- Add the following code fragment to the `api_alert.bal` file as a global variable (in the same scope the `ClientRequest` and `RequestCount` types are defined).
+For more information about how the Ballerina gmail connector is configured, click [here](https://github.com/wso2-ballerina/package-gmail/blob/master/Readme.md).
+You need to replace the values for `access-token`, `client-id`, `client-secret`, and `refresh-token` with your OAuth credentials.
+For more information abount Google OAuth 2.0 applications, click [here](https://developers.google.com/identity/protocols/OAuth2).
 
 ```ballerina
 endpoint gmail:Client gMailEP {
@@ -230,9 +227,8 @@ endpoint gmail:Client gMailEP {
 };
 ```
 
-- Replace the function body of 'printRequestCount' with the following code fragment. Then instead of printing a log,
-the program will send an email alert to the respective receipient.
-you have to replace the recipient@mail.com and sender@mail.com with a correct reciepient and sender email addresses.
+- Replace the function body of `printRequestCount` with the following code fragment. Then the program sends an email alert to the respective recipient instead of printing a log.
+You also need to replace the `recipient@mail.com` and `sender@mail.com` with the correct recipient and sender email addresses.
 
 ```ballerina
 gmail:MessageRequest messageRequest;
@@ -260,14 +256,14 @@ match sendMessageResponse {
 
 ## Testing
 
-As mentioned in previous steps, we have to invoke above developed order management service to get the alert generated 
-from streaming queries. We have to send more than 10 requests from same host with in 10 seconds to get an alert generated.
+As mentioned in the previous steps, you need to invoke the order management service you developed to get the alerts generated 
+from streaming queries. Ten or more requests need to be sent from the same host within 10 seconds to generate an alert.
 
 
 ### Invoking the service 
 
-You can run the service that you developed above, in your local environment. Open your terminal and navigate to 
-`<SAMPLE_ROOT_DIRECTORY>/streaming-service` and execute the following command.
+The service you developed above can be run in your local environment. To run it, open your terminal, navigate to the
+`<SAMPLE_ROOT_DIRECTORY>/streaming-service` directory and execute the following command.
 
 ```
 $ballerina run api-alerting
@@ -276,7 +272,7 @@ NOTE: You need to have the Ballerina installed in you local machine to run the B
 
 You can test the functionality of the order management service by sending more than ten
 HTTP request within 10 seconds to 'order' operation.
-For example, we have used the following curl command to test "order" operation as follows.
+e.g., We have used the following curl command to test "order" operation as follows.
 For an alert to be generated, the "order" operation should be invoked more than
 10 times within 10 seconds from the same host.
 
@@ -316,25 +312,24 @@ To check the implementation of the test file, refer to the [order_mgt_service_te
 
 ## Deployment
 
-Once you are done with the development, you can deploy the service using any of the methods that we listed below. 
+Once the development of the service is complete, you can deploy the service by following any of the methods that are listed below. 
 
 ### Deploying locally
 
-- As the first step you can build a Ballerina executable archive (.balx) of the service that we developed above, 
-using the following command. It points to the directory in which the service we developed above located and it will 
-create an executable binary out of that. Navigate to the `<SAMPLE_ROOT>/api-alerting/` folder and run the following command. 
+- First, build a Ballerina executable archive (.balx) of the service that you developed by navigating to the `<SAMPLE_ROOT>/api-alerting/` 
+directory and issuing the command given below. This command points to the directory in which the service is located, and creates an executable binary out of that. 
 
 ```
 $ballerina build api-alerting
 ```
 
-- Once the api-alerting.balx is created inside the target folder, you can run that with the following command. 
+- Once the `api-alerting.balx` is created inside the target directory, you can run it by issuing the following command. 
 
 ```
 $ballerina run target/api-alerting.balx
 ```
 
-- The successful execution of the service should show us the following output. 
+- Once the service is successfully executed, the following output is displayed. 
 ```
 $ ballerina run target/api-alerting.balx 
 
@@ -344,23 +339,19 @@ ballerina: started HTTP/WS server connector 0.0.0.0:9090
 
 ### Deploying on Docker
 
-You can run the service that we developed above as a docker container. As Ballerina platform offers native support for 
-running ballerina programs on containers, you just need to put the corresponding docker annotations on your service code. 
+You can run the service developed above as a docker container. The Ballerina platform offers native support to
+run Ballerina programs on containers. Therefore, you only need to add the corresponding docker annotations to your service code. 
 
 ### Deploying on Kubernetes
 
-- You can run the service that we developed above, on Kubernetes. The Ballerina language offers native support for 
-running a ballerina programs on Kubernetes, with the use of Kubernetes annotations that you can include as part of 
-your service code. Also, it will take care of the creation of the docker images. So you don't need to explicitly create 
-docker images prior to deploying it on Kubernetes. 
+- The service you developed can be run on Kubernetes. The Ballerina language offers native support to 
+run Ballerina programs on Kubernetes by using Kubernetes annotations that you can include as a part of 
+your service code. This also creates the required docker images. Therefore you do not need to explicitly create 
+docker images before deploying the service on Kubernetes. 
 
-Refer [here](https://github.com/ballerina-guides/restful-service#deployment) for more deployment options.
-
-
+For information about more deployment options, click [here](https://github.com/ballerina-guides/restful-service#deployment).
 ## Output
-
-You will see a log line as shown below, when you invoke the service by satisfying one of the 
-criteria for alert.
+If one or more of the criteria for the alert is satisfied, the following output is displayed when the service is invoked.
 
 ```
 ALERT!! : Received more than 10 requests from the host within 10 seconds: localhost:9090
