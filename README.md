@@ -271,10 +271,10 @@ $ballerina run api-alerting
 NOTE: You need to have the Ballerina installed in you local machine to run the Ballerina service.  
 
 You can test the functionality of the order management service by sending more than ten
-HTTP request within 10 seconds to 'order' operation.
-e.g., We have used the following curl command to test "order" operation as follows.
-For an alert to be generated, the "order" operation should be invoked more than
-10 times within 10 seconds from the same host.
+HTTP requests to the `order` operation within ten seconds.
+e.g., The following cURL commands are used to test the `order` operation as follows.
+For an alert to be generated, the `order` operation should be invoked more than
+ten times within a time period of ten seconds from the same host.
 
 **Create Order** 
 ```
@@ -294,7 +294,7 @@ Output :
 
 ### Writing unit tests
 
-In Ballerina, the unit test cases should be in the same package inside a folder named as 'tests'.  When writing the test functions the below convention should be followed.
+In Ballerina, the unit test cases should be in the same package inside a folder named `tests`.  When writing the test functions the below convention should be followed.
 - Test functions should be annotated with `@test:Config`. See the below example.
 ```ballerina
    @test:Config
