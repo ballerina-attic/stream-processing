@@ -26,7 +26,7 @@ endpoint http:Client clientEP {
 
 @test:Config
 // Function to test POST resource 'addOrder'.
-function testResourceAddOrder() {
+function testOrderAlerts() {
     int reqIndex = 0;
     // Initialize the empty http request.
     http:Request request = new;

@@ -113,7 +113,7 @@ function initRealtimeRequestCounter () {
     // The processing happens asynchronously each time the `requestStream` receives an event.
     forever {
         from requestStream
-        window time(10000)
+           window time(10000)
         select host, count(host) as count 
         group by host 
         having count > 10
@@ -148,45 +148,43 @@ stream.
 ```ballerina
 
 import ballerina/http;
-import ballerina/mime;
 
 function sendRequestEventToStream (string hostName) {
-        ClientRequest clientRequest = {host : hostName};
-        requestStream.publish(clientRequest);
+    ClientRequest clientRequest = {host : hostName};
+    requestStream.publish(clientRequest);
 }
 
 endpoint http:Listener listener {
-    port:9090
+    port: 9090
 };
 
 // Order management is done using an in memory map.
-// Add some sample orders to 'orderMap' at startup.
+// Add some sample orders to 'ordersMap' at startup.
 map<json> ordersMap;
 
-@Description {value:"RESTful service."}
-@http:ServiceConfig {basePath:"/ordermgt"}
-service<http:Service> order_mgt bind listener {
+// RESTful service.
+@http:ServiceConfig { basePath: "/ordermgt" }
+service<http:Service> orderMgt bind listener {
 
-    // Invoke function to initialise streming queries
     future ftr = start initRealtimeRequestCounter();
 
-    @Description {value:"Resource that handles the HTTP POST requests that are directed
-     to the path '/orders' to create a new Order."}
+    // Resource that handles the HTTP POST requests that are directed to the path
+    // '/orders' to create a new Order.
     @http:ResourceConfig {
-        methods:["POST"],
-        path:"/order"
+        methods: ["POST"],
+        path: "/order"
     }
     addOrder(endpoint client, http:Request req) {
 
-	string hostName = untaint req.getHeader("Host");
-	sendRequestEventToStream(hostName);	
+	    string hostName = untaint req.getHeader("Host");
+	    sendRequestEventToStream(hostName);
 
         json orderReq = check req.getJsonPayload();
         string orderId = orderReq.Order.ID.toString();
         ordersMap[orderId] = orderReq;
 
         // Create response message.
-        json payload = {status:"Order Created.", orderId:orderId};
+        json payload = { status: "Order Created.", orderId: orderId };
         http:Response response;
         response.setJsonPayload(payload);
 
@@ -194,10 +192,11 @@ service<http:Service> order_mgt bind listener {
         response.statusCode = 201;
         // Set 'Location' header in the response message.
         // This can be used by the client to locate the newly added order.
-        response.setHeader("Location", "http://localhost:9090/ordermgt/order/" + orderId);
+        response.setHeader("Location", "http://localhost:9090/ordermgt/order/" +
+                orderId);
 
         // Send response to the client.
-        _ = client -> respond(response);
+        _ = client->respond(response);
     }
 }
 
@@ -271,9 +270,11 @@ $ballerina run api-alerting
 ```
 NOTE: You need to have the Ballerina installed in you local machine to run the Ballerina service.  
 
-You can test the functionality of the order management service by sending HTTP request to the `order` operation. 
-
-e.g., cURL commands are used to test each operation of the `OrderMgtService` service as follows. 
+You can test the functionality of the order management service by sending more than ten
+HTTP request within 10 seconds to 'order' operation.
+e.g., We have used the following curl command to test "order" operation as follows.
+For an alert to be generated, the "order" operation should be invoked more than
+10 times within 10 seconds from the same host.
 
 **Create Order** 
 ```
@@ -290,6 +291,24 @@ Output :
 
 {"status":"Order Created.","orderId":"100500"} 
 ```
+
+### Writing unit tests
+
+In Ballerina, the unit test cases should be in the same package inside a folder named as 'tests'.  When writing the test functions the below convention should be followed.
+- Test functions should be annotated with `@test:Config`. See the below example.
+```ballerina
+   @test:Config
+   function testOrderAlerts() {
+```
+
+This guide contains  an unit test case for alert generation available in the 'order_mgt_service' implemented above.
+
+To run the unit tests, open your terminal and navigate to `<SAMPLE_ROOT_DIRECTORY>/streaming-service`, and run the following command.
+```bash
+$ ballerina test
+```
+
+To check the implementation of the test file, refer to the [order_mgt_service_test.bal](https://github.com/ballerina-guides/stream-processing/blob/master/streaming-service/api-alerting/tests/order_mgt_service_test.bal).
 
 ## Deployment
 
