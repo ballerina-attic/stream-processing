@@ -1,11 +1,11 @@
-Ballerina Streaming
-===================
+Stream Processing
+=================
 
-Ballerina streaming is designed to process event streams in a streaming manner, detect complex event occurrences,
+Streaming processing is designed to process event streams in a streaming manner, detect complex event occurrences,
 and send notifications in real-time.
 
 >This guide provides an overview of the streaming capabilities of Ballerina and demonstrates how to build a
-comprehensive streaming usecase using Ballerina Streams.
+comprehensive streaming usecase using Ballerina stream processing.
 
 The following sections are available in this guide.
 
@@ -19,7 +19,7 @@ The following sections are available in this guide.
 
 ## What you'll build
 
-To understand Ballerina streaming better, let's take a real world usecase and implement that using Ballerina streaming features.
+To understand Ballerina stream processing better, let's take a real world usecase and implement that using Ballerina stream processing features.
 
 Let's assume, that you are a API developer and you have published a few APIs to the API store. There are also subscribers who
 have subscribed to these APIs. 
