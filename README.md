@@ -154,7 +154,7 @@ function sendRequestEventToStream (string hostName) {
     requestStream.publish(clientRequest);
 }
 
-endpoint http:Listener listener {
+endpoint http:Listener endpointListener {
     port: 9090
 };
 
@@ -164,7 +164,7 @@ map<json> ordersMap;
 
 // RESTful service.
 @http:ServiceConfig { basePath: "/ordermgt" }
-service<http:Service> orderMgt bind listener {
+service<http:Service> orderMgt bind endpointListener {
 
     future ftr = start initRealtimeRequestCounter();
 
@@ -176,8 +176,8 @@ service<http:Service> orderMgt bind listener {
     }
     addOrder(endpoint client, http:Request req) {
 
-	    string hostName = untaint req.getHeader("Host");
-	    sendRequestEventToStream(hostName);
+        string hostName = untaint client.remote.host;
+        sendRequestEventToStream(hostName);
 
         json orderReq = check req.getJsonPayload();
         string orderId = orderReq.Order.ID.toString();
