@@ -104,8 +104,8 @@ function initRealtimeRequestCounter () {
     stream<RequestCount> requestCountStream;
 
     //Whenever the `requestCountStream` stream receives an event from the streaming rules defined in the `forever` block,
-    //the `printRequestCount` function is invoked.
-    requestCountStream.subscribe(printRequestCount);
+    //the `alertRequestCount` function is invoked.
+    requestCountStream.subscribe(alertRequestCount);
 
     //Gather all the events that are coming to requestStream for ten seconds, group them by the host, count the number
     //of requests per host, and check if the count is more than ten. If yes, publish the output (host and the count) to
@@ -125,8 +125,8 @@ function initRealtimeRequestCounter () {
     }
 }
 
-// Define the `printRequestCount` function.
-function printRequestCount (RequestCount reqCount) {
+// Define the `alertRequestCount` function.
+function alertRequestCount (RequestCount reqCount) {
     io:println("ALERT!! : Received more than 10 requests from the host within 10 seconds: " + reqCount.host);
 }
 
@@ -227,7 +227,7 @@ endpoint gmail:Client gMailEP {
 };
 ```
 
-- Replace the function body of `printRequestCount` with the following code fragment. Then the program sends an email alert to the respective recipient instead of printing a log.
+- Replace the function body of `alertRequestCount` with the following code fragment. Then the program sends an email alert to the respective recipient instead of printing a log.
 You also need to replace the `recipient@mail.com` and `sender@mail.com` with the correct recipient and sender email addresses.
 
 ```ballerina

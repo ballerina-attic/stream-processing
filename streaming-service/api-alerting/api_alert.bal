@@ -32,7 +32,7 @@ function initRealtimeRequestCounter () {
     stream<RequestCount> requestCountStream;
 
     //Whenever the `requestCountStream` stream receives an event from the streaming rules defined in the `forever` block,
-    //the `printRequestCount` function is invoked.
+    //the `alertRequestCount` function is invoked.
     requestCountStream.subscribe(alertRequestCount);
 
     //Gather all the events that are coming to requestStream for ten seconds, group them by the host, count the number
