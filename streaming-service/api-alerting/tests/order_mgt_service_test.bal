@@ -4,13 +4,17 @@ import ballerina/runtime;
 
 any[] outputs = [];
 int outputCount = 0;
+
+string expectedHostName;
+
 // This is the mock function which will replace the real function
 @test:Mock {
     packageName: "ballerina/io",
     functionName: "println"
 }
 public function mockPrint(any... s) {
-    outputs[outputCount] = s[0];
+    expectedHostName = <string>s[1];
+    outputs[outputCount] = <string>s[0] + expectedHostName;
     outputCount++;
 }
 
@@ -33,7 +37,7 @@ function testOrderAlerts() {
     // Construct the request payload.
     json payload = {"Order":{"ID":"100500", "Name":"XYZ", "Description":"Sample order."}};
     request.setJsonPayload(payload);
-    while (reqIndex <=20) {
+    while (reqIndex <= 20) {
         // Send 'POST' request and obtain the response.
         http:Response response = check clientEP -> post("/order", request);
         // Expected response code is 201.
@@ -51,7 +55,7 @@ function testOrderAlerts() {
     }
 
     test:assertEquals(outputs[0], "ALERT!! : Received more than 10 requests" +
-            " within 10 seconds from the host: localhost");
+            " within 10 seconds from the host: " + expectedHostName);
 }
 
 @test:AfterSuite
