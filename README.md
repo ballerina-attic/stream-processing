@@ -212,11 +212,16 @@ In the above implementation, you generate a log to the stdout. An extended versi
 the alert as an email. The following demonstrates how to configure the gmail connector to send email as alerts.
 
 - Add the following code fragment to the `api_alert.bal` file as a global variable (in the same scope the `ClientRequest` and `RequestCount` types are defined).
+Remember to import the gmail connector.
 For more information about how the Ballerina gmail connector is configured, click [here](https://github.com/wso2-ballerina/package-gmail/blob/master/Readme.md).
 You need to replace the values for `access-token`, `client-id`, `client-secret`, and `refresh-token` with your OAuth credentials.
 For more information abount Google OAuth 2.0 applications, click [here](https://developers.google.com/identity/protocols/OAuth2).
 
 ```ballerina
+//import gmail connector at the top of the file.
+import wso2/gmail;
+
+
 endpoint gmail:Client gMailEP {
     clientConfig:{
         auth:{
@@ -252,7 +257,7 @@ match sendMessageResponse {
         io:println("Sent Message Id : " + messageId);
         io:println("Sent Thread Id : " + threadId);
     }
-    gmail:GMailError e => io:println(e); //For unsuccessful attempts, returns GMail Error.
+    gmail:GmailError e => io:println(e); //For unsuccessful attempts, returns GMail Error.
 }
 ```
 
