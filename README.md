@@ -129,7 +129,7 @@ function initRealtimeRequestCounter () {
 
 // Define the `alertRequestCount` function.
 function alertRequestCount (RequestCount reqCount) {
-    io:println("ALERT!! : Received more than 10 requests from the host within 10 seconds: " + reqCount.host);
+    io:println("ALERT!! : Received more than 10 requests from the host within 10 seconds: ", reqCount.host);
 }
 
 ```
