@@ -54,7 +54,7 @@ function testOrderAlerts() {
         runtime:sleep(500);
     }
 
-    test:assertEquals(outputs[0], "ALERT!! : Received more than 10 requests from the host within 10 seconds: "
+    test:assertEquals(outputs[0], "ALERT!! : Received more than 10 requests within 10 seconds from the host: "
             + expectedHostName);
 }
 
