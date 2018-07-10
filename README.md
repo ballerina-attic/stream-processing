@@ -90,11 +90,11 @@ usecase/scenario.
 
 import ballerina/io;
 
-type ClientRequest {
+type ClientRequest record {
     string host;
 };
 
-type RequestCount {
+type RequestCount record {
     string host;
     int count;
 };
@@ -186,7 +186,7 @@ service<http:Service> orderMgt bind endpointListener {
         ordersMap[orderId] = orderReq;
 
         // Create response message.
-        json payload = { status: "Order Created.", orderId: orderId };
+        json payload = { status: "Order Created.", orderId: untaint orderId };
         http:Response response;
         response.setJsonPayload(payload);
 

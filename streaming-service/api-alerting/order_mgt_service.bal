@@ -51,7 +51,7 @@ service<http:Service> orderMgt bind endpointListener {
         ordersMap[orderId] = orderReq;
 
         // Create response message.
-        json payload = { status: "Order Created.", orderId: orderId };
+        json payload = { status: "Order Created.", orderId: untaint orderId };
         http:Response response;
         response.setJsonPayload(payload);
 
