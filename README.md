@@ -90,13 +90,13 @@ usecase/scenario.
 
 import ballerina/io;
 
-type ClientRequest {
-    string host;
+type ClientRequest record {
+    string host,
 };
 
-type RequestCount {
-    string host;
-    int count;
+type RequestCount record {
+    string host,
+    int count,
 };
 
 stream<ClientRequest> requestStream;
@@ -129,7 +129,7 @@ function initRealtimeRequestCounter () {
 
 // Define the `alertRequestCount` function.
 function alertRequestCount (RequestCount reqCount) {
-    io:println("ALERT!! : Received more than 10 requests from the host within 10 seconds: " + reqCount.host);
+    io:println("ALERT!! : Received more than 10 requests within 10 seconds from the host: " + reqCount.host);
 }
 
 ```
@@ -188,7 +188,7 @@ service<http:Service> orderMgt bind endpointListener {
         // Create response message.
         json payload = { status: "Order Created.", orderId: orderId };
         http:Response response;
-        response.setJsonPayload(payload);
+        response.setJsonPayload(untaint payload);
 
         // Set 201 Created status code in the response message.
         response.statusCode = 201;
@@ -204,7 +204,7 @@ service<http:Service> orderMgt bind endpointListener {
 
 ```
 
-- With that we've completed the development of the order_mgt_service and api_alert implementation. 
+- With that we've completed the development of the `order_mgt_service` and `api_alert` implementation.
 
 ### Customize the streaming queries to send email alerts
 
@@ -212,6 +212,10 @@ In the above implementation, you generate a log to the stdout. An extended versi
 the alert as an email. The following demonstrates how to configure the gmail connector to send email as alerts.
 
 - Add the following code fragment to the `api_alert.bal` file as a global variable (in the same scope the `ClientRequest` and `RequestCount` types are defined).
+Make sure to import the gmail package with the following import statment
+```ballerina
+import wso2/gmail;
+```
 For more information about how the Ballerina gmail connector is configured, click [here](https://github.com/wso2-ballerina/package-gmail/blob/master/Readme.md).
 You need to replace the values for `access-token`, `client-id`, `client-secret`, and `refresh-token` with your OAuth credentials.
 For more information abount Google OAuth 2.0 applications, click [here](https://developers.google.com/identity/protocols/OAuth2).
@@ -341,15 +345,15 @@ ballerina: started HTTP/WS server connector 0.0.0.0:9090
 
 ### Deploying on Docker
 
-You can run the service developed above as a docker container. The Ballerina platform offers native support to
-run Ballerina programs on containers. Therefore, you only need to add the corresponding docker annotations to your service code. 
+You can run the service developed above as a Docker container. The Ballerina platform offers native support to
+run Ballerina programs on containers. Therefore, you only need to add the corresponding Docker annotations to your service code.
 
 ### Deploying on Kubernetes
 
 - The service you developed can be run on Kubernetes. The Ballerina language offers native support to 
 run Ballerina programs on Kubernetes by using Kubernetes annotations that you can include as a part of 
-your service code. This also creates the required docker images. Therefore you do not need to explicitly create 
-docker images before deploying the service on Kubernetes. 
+your service code. This also creates the required Docker images. Therefore you do not need to explicitly create
+Docker images before deploying the service on Kubernetes.
 
 For information about more deployment options, click [here](https://github.com/ballerina-guides/restful-service#deployment).
 ## Output

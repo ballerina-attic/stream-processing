@@ -53,7 +53,8 @@ service<http:Service> orderMgt bind endpointListener {
         // Create response message.
         json payload = { status: "Order Created.", orderId: orderId };
         http:Response response;
-        response.setJsonPayload(payload);
+
+        response.setJsonPayload(untaint payload);
 
         // Set 201 Created status code in the response message.
         response.statusCode = 201;

@@ -16,13 +16,13 @@
 
 import ballerina/io;
 
-type ClientRequest {
-    string host;
+type ClientRequest record {
+    string host,
 };
 
-type RequestCount {
-    string host;
-    int count;
+type RequestCount record {
+    string host,
+    int count,
 };
 
 stream<ClientRequest> requestStream;
@@ -46,14 +46,14 @@ function initRealtimeRequestCounter () {
         group by host
         having count > 10
         => (RequestCount [] counts) {
-                //The 'counts' is the output of the streaming rules and is published to the `requestCountStream`.
-                //The `select` clause should match the structure of the 'RequestCount' struct.
-                requestCountStream.publish(counts);
+        //The 'counts' is the output of the streaming rules and is published to the `requestCountStream`.
+        //The `select` clause should match the structure of the 'RequestCount' struct.
+            requestCountStream.publish(counts);
         }
     }
 }
 
 // Define the `alertRequestCount` function.
 function alertRequestCount (RequestCount reqCount) {
-    io:println("ALERT!! : Received more than 10 requests within 10 seconds from the host: ", reqCount.host);
+    io:println("ALERT!! : Received more than 10 requests from the host within 10 seconds: ", reqCount.host);
 }
