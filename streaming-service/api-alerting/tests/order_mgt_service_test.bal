@@ -18,12 +18,6 @@ public function mockPrint(any... s) {
     outputCount++;
 }
 
-@test:BeforeSuite
-function beforeFunc() {
-    // Start the 'order_mgt' service before running the test.
-    _ = test:startServices("api-alerting");
-}
-
 endpoint http:Client clientEP {
     url:"http://localhost:9090/ordermgt"
 };
@@ -56,10 +50,4 @@ function testOrderAlerts() {
 
     test:assertEquals(outputs[0], "ALERT!! : Received more than 10 requests within 10 seconds from the host: "
             + expectedHostName);
-}
-
-@test:AfterSuite
-function afterFunc() {
-    // Stop the 'order_mgt' service after running the test.
-    test:stopServices("api-alerting");
 }
