@@ -39,8 +39,8 @@ function testOrderAlerts() {
             msg = "addOrder resource did not respond with expected response code!");
         // Check whether the response is as expected.
         json resPayload = check response.getJsonPayload();
-        test:assertEquals(resPayload.toString(),
-            "{\"status\":\"Order Created.\",\"orderId\":\"100500\"}", msg = "Response mismatch!");
+        json expectedPayload = {"status": "Order Created.", "orderId": "100500"};
+        test:assertEquals(resPayload.toString(), expectedPayload.toString(), msg = "Response mismatch!");
         reqIndex = reqIndex + 1;
     }
     // Wait till we get the alert in stdout. Note that outputs array mocks the stdout
