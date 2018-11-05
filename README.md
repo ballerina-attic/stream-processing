@@ -50,7 +50,7 @@ Before you begin, make sure that the following applications are installed:
 
 ### Create the project structure
 
-Ballerina is a complete programming language that supports any custom project structure. In this scenario, let's use the following package structure for this project to follow 
+Ballerina is a complete programming language that supports any custom project structure. In this scenario, let's use the following module structure for this project to follow 
 this guide.
 
 ```
@@ -68,10 +68,10 @@ You can create the above Ballerina project via the Ballerina project initializin
 ```bash
 streaming-service$ ballerina init -i
 Create Ballerina.toml [yes/y, no/n]: (y) y
-Organization name: (mohan) api-alerting
+Organization name: (lahiru) api_alerting
 Version: (0.0.1) 
-Ballerina source [service/s, main/m]: (s) s
-Package for the service : (no package) api-alerting
+Ballerina source [service/s, main/m, finish/f]: (s) s
+Module for the service: (no module) api_alerting
 Ballerina source [service/s, main/m, finish/f]: (f) f
 
 Ballerina project initialized
@@ -303,7 +303,8 @@ Output :
 
 ### Writing unit tests
 
-In Ballerina, the unit test cases should be in the same package inside a folder named `tests`.  When writing the test functions the below convention should be followed.
+In Ballerina, the unit test cases should be in the same module inside a folder named `tests`.  When writing the test 
+functions the below convention should be followed.
 - Test functions should be annotated with `@test:Config`. See the below example.
 ```ballerina
    @test:Config
