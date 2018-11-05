@@ -15,7 +15,7 @@ string expectedHostName;
 public function mockPrint(any... s) {
     expectedHostName = <string>s[1];
     outputs[outputCount] = <string>s[0] + expectedHostName;
-    outputCount++;
+    outputCount += 1;
 }
 
 endpoint http:Client clientEP {
