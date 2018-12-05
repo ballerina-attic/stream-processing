@@ -342,8 +342,8 @@ $ ballerina run target/api-alerting.balx
 ```
 $ ballerina run target/api-alerting.balx 
 
-ballerina: deploying service(s) in 'target/api-alerting.balx'
-ballerina: started HTTP/WS server connector 0.0.0.0:9090
+Initiating service(s) in 'target/api-alerting.balx'
+[ballerina/http] started HTTP/WS endpoint 0.0.0.0:9090
 ```
 
 ### Deploying on Docker
