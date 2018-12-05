@@ -21,19 +21,17 @@ function sendRequestEventToStream (string hostName) {
     requestStream.publish(clientRequest);
 }
 
-endpoint http:Listener endpointListener {
-    port: 9090
-};
+listener http:Listener ep = new (9090);
 
 // Order management is done using an in memory map.
 // Add some sample orders to 'ordersMap' at startup.
-map<json> ordersMap;
+map<json> ordersMap = {};
 
 // RESTful service.
 @http:ServiceConfig { basePath: "/ordermgt" }
-service<http:Service> orderMgt bind endpointListener {
+service orderMgt on ep {
 
-    future ftr = start initRealtimeRequestCounter();
+    future<()> ftr = start initRealtimeRequestCounter();
 
     // Resource that handles the HTTP POST requests that are directed to the path
     // '/orders' to create a new Order.
@@ -41,18 +39,18 @@ service<http:Service> orderMgt bind endpointListener {
         methods: ["POST"],
         path: "/order"
     }
-    addOrder(endpoint client, http:Request req) {
+    resource function addOrder(http:Caller con, http:Request req) {
 
-        string hostName = untaint client.remote.host;
+        string hostName = untaint con.remoteAddress.host;
         sendRequestEventToStream(hostName);
 
-        json orderReq = check req.getJsonPayload();
+        json orderReq = <json> req.getJsonPayload();
         string orderId = orderReq.Order.ID.toString();
         ordersMap[orderId] = orderReq;
 
         // Create response message.
         json payload = { status: "Order Created.", orderId: untaint orderId };
-        http:Response response;
+        http:Response response = new;
         response.setJsonPayload(payload);
 
         // Set 201 Created status code in the response message.
@@ -63,6 +61,6 @@ service<http:Service> orderMgt bind endpointListener {
                 orderId);
 
         // Send response to the client.
-        _ = client->respond(response);
+        _ = con->respond(response);
     }
 }

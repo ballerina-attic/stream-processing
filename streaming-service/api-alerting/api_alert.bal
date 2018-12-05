@@ -25,11 +25,11 @@ type RequestCount record {
     int count;
 };
 
-stream<ClientRequest> requestStream;
+stream<ClientRequest> requestStream = new;
 
 function initRealtimeRequestCounter () {
 
-    stream<RequestCount> requestCountStream;
+    stream<RequestCount> requestCountStream = new;
 
     //Whenever the `requestCountStream` stream receives an event from the streaming rules defined in the `forever` block,
     //the `alertRequestCount` function is invoked.
@@ -48,7 +48,7 @@ function initRealtimeRequestCounter () {
         => (RequestCount [] counts) {
                 //The 'counts' is the output of the streaming rules and is published to the `requestCountStream`.
                 //The `select` clause should match the structure of the 'RequestCount' struct.
-            foreach requestCount in counts {
+            foreach var requestCount in counts {
                 requestCountStream.publish(requestCount);
             }
         }
