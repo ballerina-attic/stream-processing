@@ -18,9 +18,7 @@ public function mockPrint(any... s) {
     outputCount += 1;
 }
 
-endpoint http:Client clientEP {
-    url:"http://localhost:9090/ordermgt"
-};
+http:Client clientEP = new ("http://localhost:9090/ordermgt");
 
 @test:Config
 // Function to test POST resource 'addOrder'.
@@ -33,18 +31,22 @@ function testOrderAlerts() {
     request.setJsonPayload(payload);
     while (reqIndex <= 20) {
         // Send 'POST' request and obtain the response.
-        http:Response response = check clientEP -> post("/order", request);
-        // Expected response code is 201.
-        test:assertEquals(response.statusCode, 201,
-            msg = "addOrder resource did not respond with expected response code!");
-        // Check whether the response is as expected.
-        json resPayload = check response.getJsonPayload();
-        json expectedPayload = {"status": "Order Created.", "orderId": "100500"};
-        test:assertEquals(resPayload.toString(), expectedPayload.toString(), msg = "Response mismatch!");
-        reqIndex = reqIndex + 1;
+        var response = clientEP -> post("/order", request);
+        if (response is http:Response) {
+            // Expected response code is 201.
+            test:assertEquals(response.statusCode, 201,
+                msg = "addOrder resource did not respond with expected response code!");
+            // Check whether the response is as expected.
+            json resPayload = <json>response.getJsonPayload();
+            json expectedPayload = { "status": "Order Created.", "orderId": "100500" };
+            test:assertEquals(resPayload.toString(), expectedPayload.toString(), msg = "Response mismatch!");
+            reqIndex = reqIndex + 1;
+        } else {
+            test:assertFail(msg = "The payload has to be json.");
+        }
     }
     // Wait till we get the alert in stdout. Note that outputs array mocks the stdout
-    while (!(lengthof outputs > 0)) {
+    while (!(outputs.length() > 0)) {
         runtime:sleep(500);
     }
 

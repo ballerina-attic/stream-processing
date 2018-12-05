@@ -6,6 +6,8 @@ Stream Processing
 Streaming processing is designed to process event streams in a streaming manner, detect complex event occurrences,
 and send notifications in real-time.
 
+Note: Ballerina Streaming capabilities are shipped as the experimental feature in the latest release. Please use `--experimental` flag when compiling Ballerina files which have streaming constructs.
+
 >This guide provides an overview of the streaming capabilities of Ballerina and demonstrates how to build a
 comprehensive streaming usecase using Ballerina stream processing.
 
@@ -99,39 +101,39 @@ type RequestCount record {
     int count;
 };
 
-stream<ClientRequest> requestStream;
+stream<ClientRequest> requestStream = new;
 
 function initRealtimeRequestCounter () {
 
-    stream<RequestCount> requestCountStream;
+    stream<RequestCount> requestCountStream = new;
 
     //Whenever the `requestCountStream` stream receives an event from the streaming rules defined in the `forever` block,
     //the `alertRequestCount` function is invoked.
     requestCountStream.subscribe(alertRequestCount);
 
     //Gather all the events that are coming to requestStream for ten seconds, group them by the host, count the number
-    //of requests per host, and check if the count is more than ten. If yes, publish the output (host and the count) to
+    //of requests per host, and check if the count is more than 10. If yes, publish the output (host and the count) to
     //the `requestCountStream` stream as an alert. This `forever` block is executed once, when initializing the service.
     // The processing happens asynchronously each time the `requestStream` receives an event.
     forever {
         from requestStream
-           window time(10000)
-        select host, count(host) as count 
-        group by host 
+        window time(10000)
+        select host, count(host) as count
+        group by host
         having count > 10
         => (RequestCount [] counts) {
                 //The 'counts' is the output of the streaming rules and is published to the `requestCountStream`.
                 //The `select` clause should match the structure of the 'RequestCount' struct.
-                foreach requestCount in counts {
-                    requestCountStream.publish(requestCount);
-                }
+            foreach var requestCount in counts {
+                requestCountStream.publish(requestCount);
+            }
         }
     }
 }
 
 // Define the `alertRequestCount` function.
 function alertRequestCount (RequestCount reqCount) {
-    io:println("ALERT!! : Received more than 10 requests from the host within 10 seconds: ", reqCount.host);
+    io:println("ALERT!! : Received more than 10 requests within 10 seconds from the host: ", reqCount.host);
 }
 
 ```
@@ -158,19 +160,17 @@ function sendRequestEventToStream (string hostName) {
     requestStream.publish(clientRequest);
 }
 
-endpoint http:Listener endpointListener {
-    port: 9090
-};
+listener http:Listener ep = new (9090);
 
 // Order management is done using an in memory map.
 // Add some sample orders to 'ordersMap' at startup.
-map<json> ordersMap;
+map<json> ordersMap = {};
 
 // RESTful service.
 @http:ServiceConfig { basePath: "/ordermgt" }
-service<http:Service> orderMgt bind endpointListener {
+service orderMgt on ep {
 
-    future ftr = start initRealtimeRequestCounter();
+    future<()> ftr = start initRealtimeRequestCounter();
 
     // Resource that handles the HTTP POST requests that are directed to the path
     // '/orders' to create a new Order.
@@ -178,18 +178,18 @@ service<http:Service> orderMgt bind endpointListener {
         methods: ["POST"],
         path: "/order"
     }
-    addOrder(endpoint client, http:Request req) {
+    resource function addOrder(http:Caller con, http:Request req) {
 
-        string hostName = untaint client.remote.host;
+        string hostName = untaint con.remoteAddress.host;
         sendRequestEventToStream(hostName);
 
-        json orderReq = check req.getJsonPayload();
+        json orderReq = <json> req.getJsonPayload();
         string orderId = orderReq.Order.ID.toString();
         ordersMap[orderId] = orderReq;
 
         // Create response message.
         json payload = { status: "Order Created.", orderId: untaint orderId };
-        http:Response response;
+        http:Response response = new;
         response.setJsonPayload(payload);
 
         // Set 201 Created status code in the response message.
@@ -200,7 +200,7 @@ service<http:Service> orderMgt bind endpointListener {
                 orderId);
 
         // Send response to the client.
-        _ = client->respond(response);
+        _ = con->respond(response);
     }
 }
 
