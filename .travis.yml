@@ -38,4 +38,4 @@ script:
 
 - ballerina init
 
-- ballerina test api-alerting
+- ballerina test --experimental api-alerting

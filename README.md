@@ -275,7 +275,7 @@ The service you developed above can be run in your local environment. To run it,
 `<SAMPLE_ROOT_DIRECTORY>/streaming-service` directory and execute the following command.
 
 ```
-$ ballerina run api-alerting
+$ ballerina run --experimental api-alerting
 ```
 NOTE: You need to have the Ballerina installed in you local machine to run the Ballerina service.  
 
@@ -314,7 +314,7 @@ This guide contains  an unit test case for alert generation available in the 'or
 
 To run the unit tests, open your terminal and navigate to `<SAMPLE_ROOT_DIRECTORY>/streaming-service`, and run the following command.
 ```bash
-$ ballerina test
+$ ballerina test --experimental
 ```
 
 To check the implementation of the test file, refer to the [order_mgt_service_test.bal](https://github.com/ballerina-guides/stream-processing/blob/master/streaming-service/api-alerting/tests/order_mgt_service_test.bal).
@@ -329,7 +329,7 @@ Once the development of the service is complete, you can deploy the service by f
 directory and issuing the command given below. This command points to the directory in which the service is located, and creates an executable binary out of that. 
 
 ```
-$ ballerina build api-alerting
+$ ballerina build --experimental api-alerting
 ```
 
 - Once the `api-alerting.balx` is created inside the target directory, you can run it by issuing the following command. 
