@@ -224,23 +224,24 @@ For more information abount Google OAuth 2.0 applications, click [here](https://
 import wso2/gmail;
 
 
-endpoint gmail:Client gMailEP {
-    clientConfig:{
-        auth:{
-            accessToken:"access-token",
-            clientId:"client-id",
-            clientSecret:"client-secret",
-            refreshToken:"refresh-token"
+gmail:Client gmailEP = new({
+    clientConfig: {
+        auth: {
+            scheme: http:OAUTH2,
+            accessToken: "access-token",
+            clientId: "client-id",
+            clientSecret: "client-secret",
+            refreshToken: "refresh-token"
         }
     }
-};
+});
 ```
 
 - Replace the function body of `alertRequestCount` with the following code fragment. Then the program sends an email alert to the respective recipient instead of printing a log.
 You also need to replace the `recipient@mail.com` and `sender@mail.com` with the correct recipient and sender email addresses.
 
 ```ballerina
-gmail:MessageRequest messageRequest;
+gmail:MessageRequest messageRequest = {};
 messageRequest.recipient = "recipient@mail.com";
 messageRequest.sender = "sender@mail.com";
 messageRequest.subject = "Too many orders!!";
@@ -250,16 +251,16 @@ messageRequest.contentType = gmail:TEXT_PLAIN;
 
 //Call the GMail endpoint function sendMessage().
 var sendMessageResponse = gMailEP -> sendMessage("me", messageRequest);
-match sendMessageResponse {
-    (string, string) sendStatus => {
-        //For a successful message request, returns message and thread id.
-        string messageId;
-        string threadId;
-        (messageId, threadId) = sendStatus;
-        io:println("Sent Message Id : " + messageId);
-        io:println("Sent Thread Id : " + threadId);
-    }
-    gmail:GmailError e => io:println(e); //For unsuccessful attempts, returns GMail Error.
+
+if (sendMessageResponse is (string, string)) {
+    //For a successful message request, returns message and thread id.
+    string messageId = "";
+    string threadId = "";
+    (messageId, threadId) = sendMessageResponse;
+    io:println("Sent Message Id : " + messageId);
+    io:println("Sent Thread Id : " + threadId);
+} else {
+    io:println(sendMessageResponse);
 }
 ```
 
