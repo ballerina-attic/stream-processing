@@ -32,10 +32,16 @@ script:
 
 - export PATH=${PATH}:$(pwd)/${DISTRIBUTION_NAME}/bin
 
+- export JAVA_OPTS="-Denable.siddhiRuntime=false"
+
+- echo $JAVA_OPTS
+
 - ballerina version
 
 - cd streaming-service
 
 - ballerina init
+
+- echo $JAVA_OPTS
 
 - ballerina test --experimental api-alerting
