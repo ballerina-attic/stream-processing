@@ -107,14 +107,14 @@ stream<RequestCount> requestCountStream = new;
 function initRealtimeRequestCounter () {
 
     //Whenever the `requestCountStream` stream receives an event from the streaming rules defined in the
-    // `forever` block, the `alertRequestCount` function is invoked.
+    //`forever` block, the `alertRequestCount` function is invoked.
     requestCountStream.subscribe(alertRequestCount);
 
-    //Gather all the events that are coming to requestStream for ten seconds, group them by the host, count the
-    // number of requests per host, and check if the count is more than 10. If yes, publish the output (host and
-    // the count) to the `requestCountStream` stream as an alert. This `forever` block is executed once, when
-    // initializing the service.
-    // The processing happens asynchronously each time the `requestStream` receives an event.
+    //Gather all the events that are coming to requestStream for ten seconds, group them by the host,
+    //count the number of requests per host, and check if the count is more than 10. If yes,
+    //publish the output (host and the count) to the `requestCountStream` stream as an alert. This
+    //`forever` block is executed once, when initializing the service. The processing happens
+    //asynchronously each time the `requestStream` receives an event.
 
     forever {
         from requestStream window timeWindow(10000)
