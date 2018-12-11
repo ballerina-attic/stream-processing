@@ -42,6 +42,4 @@ script:
 
 - ballerina init
 
-- echo $JAVA_OPTS
-
 - ballerina test --experimental api-alerting
