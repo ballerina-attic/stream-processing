@@ -117,7 +117,7 @@ function initRealtimeRequestCounter () {
     //asynchronously each time the `requestStream` receives an event.
 
     forever {
-        from requestStream window timeWindow(10000)
+        from requestStream window time(10000)
         select requestStream.host, count()  as count
         group by requestStream.host
         having count > 10
