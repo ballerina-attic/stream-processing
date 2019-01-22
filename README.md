@@ -37,12 +37,11 @@ mechanism that sends you an alert if the number of API/service requests from an 
 
 Before you begin, make sure that the following applications are installed:
  
-- JDK 1.8 or later
-- [Ballerina Distribution](https://github.com/ballerina-lang/ballerina/blob/master/docs/quick-tour.md)
+- [Ballerina Distribution](https://ballerina.io/learn/getting-started/)
 - A Text Editor or an IDE 
+> **Tip**: You can install the following Ballerina IDE plugins: [VSCode](https://marketplace.visualstudio.com/items?itemName=ballerina.ballerina), [IntelliJ IDEA](https://plugins.jetbrains.com/plugin/9520-ballerina)
 
 ### Optional requirements
-- Ballerina IDE plugins ([VSCode](https://marketplace.visualstudio.com/items?itemName=ballerina.ballerina), [IntelliJ IDEA](https://plugins.jetbrains.com/plugin/9520-ballerina))
 - [Docker](https://docs.docker.com/engine/installation/)
 
 
