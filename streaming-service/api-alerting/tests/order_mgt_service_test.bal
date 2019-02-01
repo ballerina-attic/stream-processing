@@ -5,7 +5,7 @@ import ballerina/runtime;
 any[] outputs = [];
 int outputCount = 0;
 
-string expectedHostName;
+string expectedHostName = "";
 
 // This is the mock function which will replace the real function
 @test:Mock {
