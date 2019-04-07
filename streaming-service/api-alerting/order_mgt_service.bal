@@ -39,7 +39,7 @@ service orderMgt on ep {
         methods: ["POST"],
         path: "/order"
     }
-    resource function addOrder(http:Caller con, http:Request req) {
+    resource function addOrder(http:Caller con, http:Request req) returns error? {
 
         string hostName = untaint con.remoteAddress.host;
         sendRequestEventToStream(hostName);
@@ -61,6 +61,6 @@ service orderMgt on ep {
                 orderId);
 
         // Send response to the client.
-        _ = con->respond(response);
+        _ = check con->respond(response);
     }
 }
