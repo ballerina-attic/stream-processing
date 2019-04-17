@@ -16,8 +16,10 @@
 
 import ballerina/http;
 
-function sendRequestEventToStream (string hostName) {
-    ClientRequest clientRequest = {host : hostName};
+function sendRequestEventToStream(string hostName) {
+    ClientRequest clientRequest = {
+        host: hostName
+    };
     requestStream.publish(clientRequest);
 }
 
@@ -25,10 +27,14 @@ listener http:Listener ep = new (9090);
 
 // Order management is done using an in memory map.
 // Add some sample orders to 'ordersMap' at startup.
-map<json> ordersMap = {};
+map<json> ordersMap = {
+
+};
 
 // RESTful service.
-@http:ServiceConfig { basePath: "/ordermgt" }
+@http:ServiceConfig {
+    basePath: "/ordermgt"
+}
 service orderMgt on ep {
 
     future<()> ftr = start initRealtimeRequestCounter();
@@ -39,7 +45,7 @@ service orderMgt on ep {
         methods: ["POST"],
         path: "/order"
     }
-    resource function addOrder(http:Caller con, http:Request req) {
+    resource function addOrder(http:Caller con, http:Request req) returns error? {
 
         string hostName = untaint con.remoteAddress.host;
         sendRequestEventToStream(hostName);
@@ -49,7 +55,10 @@ service orderMgt on ep {
         ordersMap[orderId] = orderReq;
 
         // Create response message.
-        json payload = { status: "Order Created.", orderId: untaint orderId };
+        json payload = {
+            status: "Order Created.",
+            orderId: untaint orderId
+        };
         http:Response response = new;
         response.setJsonPayload(payload);
 
@@ -58,9 +67,9 @@ service orderMgt on ep {
         // Set 'Location' header in the response message.
         // This can be used by the client to locate the newly added order.
         response.setHeader("Location", "http://localhost:9090/ordermgt/order/" +
-                orderId);
+        orderId);
 
         // Send response to the client.
-        _ = con->respond(response);
+        _ = check con->respond(response);
     }
 }
