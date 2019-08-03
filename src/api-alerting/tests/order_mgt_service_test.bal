@@ -20,7 +20,9 @@ public function mockPrint(any... s) {
 
 http:Client clientEP = new ("http://localhost:9090/ordermgt");
 
-@test:Config
+@test:Config {
+
+}
 // Function to test POST resource 'addOrder'.
 function testOrderAlerts() {
     int reqIndex = 0;

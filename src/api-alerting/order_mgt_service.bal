@@ -37,7 +37,7 @@ map<json> ordersMap = {
 }
 service orderMgt on ep {
 
-    future<()> ftr = start initRealtimeRequestCounter();
+    () ftr = initRealtimeRequestCounter();
 
     // Resource that handles the HTTP POST requests that are directed to the path
     // '/orders' to create a new Order.
@@ -47,7 +47,7 @@ service orderMgt on ep {
     }
     resource function addOrder(http:Caller con, http:Request req) returns error? {
 
-        string hostName = untaint con.remoteAddress.host;
+        string hostName = <@untainted> con.remoteAddress.host;
         sendRequestEventToStream(hostName);
 
         json orderReq = <json> req.getJsonPayload();
@@ -57,7 +57,7 @@ service orderMgt on ep {
         // Create response message.
         json payload = {
             status: "Order Created.",
-            orderId: untaint orderId
+            orderId: <@untainted> orderId
         };
         http:Response response = new;
         response.setJsonPayload(payload);
