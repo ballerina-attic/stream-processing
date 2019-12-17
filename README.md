@@ -51,31 +51,35 @@ Before you begin, make sure that the following applications are installed:
 
 ### Create the project structure
 
-Ballerina is a complete programming language that supports any custom project structure. In this scenario, let's use the following module structure for this project to follow 
-this guide.
+Ballerina is a complete programming language that needs to have a certain project structure. In this scenario, let's use the following module structure for this project to follow this guide.
 
 ```
-streaming-service
-  └── api-alerting
-      ├── order_mgt_service.bal
-      ├── api_alert.bal
-      └── test
-          └── order_mgt_service_test.bal          
+├── Ballerina.toml
+├── src/
+│   └── api-alerting/
+│       ├── api_alert.bal
+│       ├── order_mgt_service.bal
+│       ├── resources/
+│       └── tests/
+│           └── order_mgt_service_test.bal
+└── tests/
+    └── resources/
+         
 ```
 You can create the above Ballerina project via the Ballerina project initializing toolkit.
 
-- First, create a new directory named `streaming-service` in your local machine. Then navigate to this directory in the terminal. 
+- First, Navigate to any folder where you would create ballerina project folder.
 - Enter the following inputs to the Ballerina project initializing toolkit.
+  
 ```bash
-streaming-service$ ballerina init -i
-Create Ballerina.toml [yes/y, no/n]: (y) y
-Organization name: (lahiru) api_alerting
-Version: (0.0.1) 
-Ballerina source [service/s, main/m, finish/f]: (s) s
-Module for the service: (no module) api_alerting
-Ballerina source [service/s, main/m, finish/f]: (f) f
+~$ ballerina new streaming-service
+Created new ballerina project at streaming-service
 
-Ballerina project initialized
+Next:
+    Use `ballerina create` to create a ballerina module inside the project.
+~$ cd streaming-service
+~$ ballerina create api_alerting
+Created new ballerina module at 'src/api_alerting
 ```
 
 - Once you initialize your Ballerina project, you can change/add the names of the file to match our guide project file 
@@ -194,7 +198,7 @@ map<json> ordersMap = {
 }
 service orderMgt on ep {
 
-    future<()> ftr = start initRealtimeRequestCounter();
+    () ftr = initRealtimeRequestCounter();
 
     // Resource that handles the HTTP POST requests that are directed to the path
     // '/orders' to create a new Order.
@@ -204,7 +208,7 @@ service orderMgt on ep {
     }
     resource function addOrder(http:Caller con, http:Request req) returns error? {
 
-        string hostName = untaint con.remoteAddress.host;
+        string hostName = <@untainted> con.remoteAddress.host;
         sendRequestEventToStream(hostName);
 
         json orderReq = <json> req.getJsonPayload();
@@ -214,7 +218,7 @@ service orderMgt on ep {
         // Create response message.
         json payload = {
             status: "Order Created.",
-            orderId: untaint orderId
+            orderId: <@untainted> orderId
         };
         http:Response response = new;
         response.setJsonPayload(payload);
@@ -233,63 +237,7 @@ service orderMgt on ep {
 
 ```
 
-- With that we've completed the development of the order_mgt_service and api_alert implementation. 
-
-### Customize the streaming queries to send email alerts
-
-In the above implementation, you generate a log to the stdout. An extended version of the above implementation sends 
-the alert as an email. The following demonstrates how to configure the gmail connector to send email as alerts.
-
-- Add the following code fragment to the `api_alert.bal` file as a global variable (in the same scope the `ClientRequest` and `RequestCount` types are defined).
-Remember to import the gmail connector.
-For more information about how the Ballerina gmail connector is configured, click [here](https://github.com/wso2-ballerina/package-gmail/blob/master/Readme.md).
-You need to replace the values for `access-token`, `client-id`, `client-secret`, and `refresh-token` with your OAuth credentials.
-For more information abount Google OAuth 2.0 applications, click [here](https://developers.google.com/identity/protocols/OAuth2).
-
-```ballerina
-//import gmail connector at the top of the file.
-import wso2/gmail;
-
-
-gmail:Client gmailEP = new({
-    clientConfig: {
-        auth: {
-            scheme: http:OAUTH2,
-            accessToken: "access-token",
-            clientId: "client-id",
-            clientSecret: "client-secret",
-            refreshToken: "refresh-token"
-        }
-    }
-});
-```
-
-- Replace the function body of `alertRequestCount` with the following code fragment. Then the program sends an email alert to the respective recipient instead of printing a log.
-You also need to replace the `recipient@mail.com` and `sender@mail.com` with the correct recipient and sender email addresses.
-
-```ballerina
-gmail:MessageRequest messageRequest = {};
-messageRequest.recipient = "recipient@mail.com";
-messageRequest.sender = "sender@mail.com";
-messageRequest.subject = "Too many orders!!";
-messageRequest.messageBody = "Received more than 10 requests from the host within 10 seconds: " + reqCount.host;
-//Set the content type of the mail as TEXT_PLAIN or TEXT_HTML.
-messageRequest.contentType = gmail:TEXT_PLAIN;
-
-//Call the GMail endpoint function sendMessage().
-var sendMessageResponse = gMailEP -> sendMessage("me", messageRequest);
-
-if (sendMessageResponse is (string, string)) {
-    //For a successful message request, returns message and thread id.
-    string messageId = "";
-    string threadId = "";
-    (messageId, threadId) = sendMessageResponse;
-    io:println("Sent Message Id : " + messageId);
-    io:println("Sent Thread Id : " + threadId);
-} else {
-    io:println(sendMessageResponse);
-}
-```
+- With that we've completed the development of the order_mgt_service and  api_alert implementation.
 
 ## Testing
 
@@ -334,7 +282,7 @@ Output :
 In Ballerina, the unit test cases should be in the same module inside a folder named `tests`.  When writing the test functions the below convention should be followed.
 - Test functions should be annotated with `@test:Config`. See the below example.
 ```ballerina
-   @test:Config
+   @test:Config {}
    function testOrderAlerts() {
 ```
 
@@ -353,25 +301,23 @@ Once the development of the service is complete, you can deploy the service by f
 
 ### Deploying locally
 
-- First, build a Ballerina executable archive (.balx) of the service that you developed by navigating to the `<SAMPLE_ROOT>/api-alerting/` 
-directory and issuing the command given below. This command points to the directory in which the service is located, and creates an executable binary out of that. 
+- First, build a Ballerina executable archive (.jar) of the service that you developed by navigating to the `<SAMPLE_ROOT>/stream-service/` directory and issuing the command given below. This command points to the directory in which the service is located, and creates an executable binary out of that.
 
 ```
 $ ballerina build --experimental api-alerting
 ```
 
-- Once the `api-alerting.balx` is created inside the target directory, you can run it by issuing the following command. 
+- Once the `api-alerting-executable.jar` is created inside the target/bin directory, you can run it by issuing the following command.
+  
 
 ```
-$ ballerina run target/api-alerting.balx
+$ ballerina run target/bin/api-alerting-executable.jar
 ```
 
 - Once the service is successfully executed, the following output is displayed. 
 ```
-$ ballerina run target/api-alerting.balx 
-
-Initiating service(s) in 'target/api-alerting.balx'
-[ballerina/http] started HTTP/WS endpoint 0.0.0.0:9090
+$ ballerina run target/bin/api-alerting-executable.jar
+[ballerina/http] started HTTP/WS listener 0.0.0.0:9090
 ```
 
 ### Deploying on Docker
